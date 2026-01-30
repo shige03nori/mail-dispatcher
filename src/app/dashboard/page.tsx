@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { LogoutButton } from "./LogoutButton";
 
 export default async function DashboardPage() {
   const session = await getSession(); // ← ここがポイント
@@ -11,7 +12,10 @@ export default async function DashboardPage() {
 
   return (
     <main style={{ maxWidth: 800, margin: "40px auto", padding: 16 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
+        <LogoutButton />
+      </div>
 
       <div style={{ marginTop: 16, padding: 12, border: "1px solid #ddd" }}>
         <div><b>組織</b>: {org?.name ?? "(unknown)"}</div>
