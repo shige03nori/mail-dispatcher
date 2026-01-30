@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/**
+ * =========================
+ * Enums
+ * =========================
+ */
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  DISABLED
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum CampaignType {
+  JOB
+  TALENT
+}
+
+enum CampaignStatus {
+  DRAFT
+  SENDING
+  DONE
+}
+
+enum SendStatus {
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+/**
+ * =========================
+ * Core: Organization / User / Membership
+ * =========================
+ */
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  domain    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     Membership[]
+  invitations Invitation[]
+  contacts    Contact[]
+  templates   Template[]
+  campaigns   Campaign[]
+  sendHistory SendHistory[]
+  settings    OrganizationSetting?
+  auditLogs   AuditLog[]
+
+  @@index([domain])
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  name      String?
+  status    UserStatus @default(INVITED)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  memberships        Membership[]
+  createdInvitations Invitation[] @relation("InvitationCreatedBy")
+  loginTokens        LoginToken[]
+
+  createdContacts  Contact[]  @relation("ContactCreatedBy")
+  updatedContacts  Contact[]  @relation("ContactUpdatedBy")
+  createdTemplates Template[] @relation("TemplateCreatedBy")
+  updatedTemplates Template[] @relation("TemplateUpdatedBy")
+  createdCampaigns Campaign[] @relation("CampaignCreatedBy")
+
+  sendHistorySentBy SendHistory[] @relation("SendHistorySentBy")
+  auditLogs         AuditLog[]
+}
+
+model Membership {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  role           Role     @default(VIEWER)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+/**
+ * =========================
+ * Invitation (招待制)
+ * =========================
+ */
+
+model Invitation {
+  id             String @id @default(uuid())
+  organizationId String
+  email          String
+  role           Role   @default(VIEWER)
+
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("InvitationCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+/**
+ * =========================
+ * LoginToken (Magic Link)
+ * =========================
+ */
+
+model LoginToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/**
+ * =========================
+ * Business
+ * =========================
+ */
+
+model Contact {
+  id             String @id @default(uuid())
+  organizationId String
+
+  name     String
+  company  String?
+  phone    String?
+  email    String
+  tagsJson String?
+
+  optOut       Boolean @default(false)
+  optOutReason String?
+  notes        String?
+
+  createdByUserId String
+  updatedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy    User?        @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  sendHistory SendHistory[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Template {
+  id             String @id @default(uuid())
+  organizationId String
+
+  name          String
+  subject       String
+  body          String
+  variablesJson String?
+
+  createdByUserId String
+  updatedByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("TemplateCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy    User?        @relation("TemplateUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  campaigns Campaign[]
+
+  @@index([organizationId])
+}
+
+model Campaign {
+  id             String         @id @default(uuid())
+  organizationId String
+  type           CampaignType
+  name           String
+  description    String?
+  status         CampaignStatus @default(DRAFT)
+
+  templateId      String
+  createdByUserId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template     @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  createdBy    User         @relation("CampaignCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  sendHistory SendHistory[]
+
+  @@index([organizationId])
+  @@index([templateId])
+}
+
+model SendHistory {
+  id             String @id @default(uuid())
+  organizationId String
+
+  campaignId String
+  contactId  String
+
+  toEmail      String
+  subjectFinal String
+  bodyFinal    String
+
+  status       SendStatus
+  errorMessage String?
+  sentAt       DateTime?
+  isTest       Boolean    @default(false)
+
+  sentByUserId String?
+
+  createdAt DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  sentBy       User?        @relation("SendHistorySentBy", fields: [sentByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, campaignId, contactId])
+  @@index([organizationId])
+  @@index([campaignId])
+  @@index([contactId])
+}
+
+model OrganizationSetting {
+  id             String @id @default(uuid())
+  organizationId String @unique
+
+  mailFromAddress String?
+  mailFromName    String?
+  replyToAddress  String?
+  signature       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id             String  @id @default(uuid())
+  organizationId String
+  actorUserId    String?
+
+  action     String
+  targetType String?
+  targetId   String?
+  beforeJson String?
+  afterJson  String?
+
+  createdAt DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([actorUserId])
+  @@index([action])
+}
