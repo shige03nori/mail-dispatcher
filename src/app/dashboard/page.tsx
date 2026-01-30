@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "./LogoutButton";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await getSession(); // ← ここがポイント
@@ -22,6 +23,12 @@ export default async function DashboardPage() {
         <div><b>ユーザー</b>: {user?.email ?? "(unknown)"}</div>
         <div><b>ロール</b>: {session.role}</div>
       </div>
+      <Link
+        href="/dashboard/invite"
+        style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8, display: "inline-block" }}
+      >
+        ユーザー招待
+      </Link>
     </main>
   );
 }
