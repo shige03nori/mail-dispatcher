@@ -29,6 +29,12 @@ export default async function DashboardPage() {
       >
         ユーザー招待
       </Link>
+<Link
+        href="/dashboard/contacts"
+        style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8, display: "inline-block" }}
+      >
+        連絡先
+      </Link>
     </main>
   );
 }

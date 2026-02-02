@@ -163,15 +163,12 @@ model Contact {
   id             String @id @default(uuid())
   organizationId String
 
-  name     String
-  company  String?
-  phone    String?
-  email    String
-  tagsJson String?
+  name        String
+  companyName String?
+  email       String?
+  phone       String?
 
-  optOut       Boolean @default(false)
-  optOutReason String?
-  notes        String?
+  note String?
 
   createdByUserId String
   updatedByUserId String?
@@ -185,9 +182,10 @@ model Contact {
 
   sendHistory SendHistory[]
 
-  @@unique([organizationId, email])
   @@index([organizationId])
   @@index([email])
+  @@index([phone])
+  @@index([companyName])
 }
 
 model Template {
