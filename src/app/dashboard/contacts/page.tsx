@@ -10,7 +10,7 @@ export default async function ContactsPage() {
 
   const contacts = await prisma.contact.findMany({
     where: { organizationId: session.organizationId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { updatedAt: "desc" },
   });
 
   const canEdit = session.role !== "VIEWER";

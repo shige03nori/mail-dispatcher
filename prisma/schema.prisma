@@ -35,14 +35,22 @@ enum CampaignType {
   TALENT
 }
 
+enum SendStatus {
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
 enum CampaignStatus {
   DRAFT
   SENDING
-  DONE
+  SENT
+  FAILED
 }
 
-enum SendStatus {
-  SUCCESS
+enum RecipientStatus {
+  PENDING
+  SENT
   FAILED
   SKIPPED
 }
@@ -60,14 +68,16 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members     Membership[]
-  invitations Invitation[]
-  contacts    Contact[]
-  templates   Template[]
-  campaigns   Campaign[]
-  sendHistory SendHistory[]
-  settings    OrganizationSetting?
-  auditLogs   AuditLog[]
+  members        Membership[]
+  invitations    Invitation[]
+  contacts       Contact[]
+  templates      Template[]
+  campaigns      Campaign[]
+  sendHistory    SendHistory[]
+  settings       OrganizationSetting?
+  auditLogs      AuditLog[]
+  emailTemplates EmailTemplate[]
+  emailCampaigns EmailCampaign[]
 
   @@index([domain])
 }
@@ -90,8 +100,14 @@ model User {
   updatedTemplates Template[] @relation("TemplateUpdatedBy")
   createdCampaigns Campaign[] @relation("CampaignCreatedBy")
 
-  sendHistorySentBy SendHistory[] @relation("SendHistorySentBy")
+  sendHistorySentBy SendHistory[]   @relation("SendHistorySentBy")
   auditLogs         AuditLog[]
+  emailTemplates    EmailTemplate[]
+  emailCampaigns    EmailCampaign[]
+
+  templatesCreated EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  templatesUpdated EmailTemplate[] @relation("EmailTemplateUpdatedBy")
+  campaignsCreated EmailCampaign[] @relation("EmailCampaignCreatedBy")
 }
 
 model Membership {
@@ -180,7 +196,8 @@ model Contact {
   createdBy    User         @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   updatedBy    User?        @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
 
-  sendHistory SendHistory[]
+  sendHistory        SendHistory[]
+  campaignRecipients EmailCampaignRecipient[]
 
   @@index([organizationId])
   @@index([email])
@@ -301,4 +318,91 @@ model AuditLog {
   @@index([organizationId])
   @@index([actorUserId])
   @@index([action])
+}
+
+model EmailTemplate {
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String
+  subject        String
+  textBody       String
+  htmlBody       String?
+  isArchived     Boolean @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdByUserId String
+  updatedByUserId String
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User         @relation("EmailTemplateCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedByUser User         @relation("EmailTemplateUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  campaigns EmailCampaign[]
+  user      User?           @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@unique([organizationId, name])
+  @@index([organizationId, isArchived, updatedAt])
+}
+
+model EmailCampaign {
+  id             String @id @default(cuid())
+  organizationId String
+
+  templateId           String?
+  templateNameSnapshot String?
+  subjectSnapshot      String
+  textBodySnapshot     String
+  htmlBodySnapshot     String?
+
+  status CampaignStatus @default(DRAFT)
+
+  totalCount   Int @default(0)
+  sentCount    Int @default(0)
+  failedCount  Int @default(0)
+  skippedCount Int @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdByUserId String
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User         @relation("EmailCampaignCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  template EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  recipients EmailCampaignRecipient[]
+  user       User?                    @relation(fields: [userId], references: [id])
+  userId     String?
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, status, updatedAt])
+}
+
+model EmailCampaignRecipient {
+  id         String  @id @default(cuid())
+  campaignId String
+  contactId  String?
+
+  // 送信時点で使った宛先（Contactから拾って保存）
+  emailSnapshot       String?
+  // 名前差し込みなどに使うなら、必要最低限で snapshot を増やしてもOK
+  contactNameSnapshot String?
+
+  status       RecipientStatus @default(PENDING)
+  errorMessage String?
+
+  // メールプロバイダの messageId などを保存したければ
+  providerMessageId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campaign EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contact  Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId, status, updatedAt])
+  @@index([contactId])
+  @@index([emailSnapshot])
 }

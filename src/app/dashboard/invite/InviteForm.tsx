@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { formStyle } from "@/lib/ui/formStyle";
+import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 export default function InviteForm() {
   const [email, setEmail] = useState("");
@@ -35,16 +37,19 @@ export default function InviteForm() {
         type="email"
         placeholder="user@example.com"
         required
-        style={{ padding: 10 }}
+        style={formStyle.input}
       />
 
       <label style={{ fontWeight: 600 }}>権限</label>
-      <select value={role} onChange={(e) => setRole(e.target.value as "VIEWER" | "EDITOR")} style={{ padding: 10 }}>
+      <select value={role} onChange={(e) => setRole(e.target.value as "VIEWER" | "EDITOR")} style={formStyle.select}>
         <option value="VIEWER">VIEWER（閲覧のみ）</option>
         <option value="EDITOR">EDITOR（編集可）</option>
       </select>
 
-      <button type="submit" style={{ padding: 10, border: "1px solid #ddd", borderRadius: 8 }}>
+      <button type="submit" style={{ 
+                        ...buttonStyle.base,
+                        ...buttonStyle.primary,
+                   }}>
         招待リンクを発行
       </button>
 

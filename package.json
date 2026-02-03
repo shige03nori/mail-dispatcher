@@ -8,19 +8,26 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "ts-node prisma/seed.ts",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "dev:reset": "npm run prisma:migrate && npm run prisma:generate && next dev",
+    "dev:clean": "rimraf .next && npm run dev",
+    "dev:full": "rimraf .next && npm run prisma:migrate && npm run prisma:generate && next dev"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "better-sqlite3": "^12.6.2",
     "next": "16.1.6",
+    "nodemailer": "^7.0.13",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
