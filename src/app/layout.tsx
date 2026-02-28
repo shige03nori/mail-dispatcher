@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,10 +24,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* ダッシュボードに戻るアイコン */}
+        <Link href="/dashboard" className="dashboard-home" aria-label="ダッシュボードへ">
+          {/* シンプルな家アイコン（文字でもOK） */}
+          🏠
+        </Link>
         {children}
       </body>
     </html>

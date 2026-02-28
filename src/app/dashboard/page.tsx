@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "./LogoutButton";
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -15,17 +15,6 @@ export default async function DashboardPage() {
   });
 
   const canEdit = session.role !== "VIEWER";
-
-  const buttonStyle: CSSProperties = {
-    padding: "10px 14px",
-    border: "1px solid #ddd",
-    borderRadius: 10,
-    fontWeight: 800,
-    color: "#111",
-    background: "#fff",
-    textDecoration: "none",
-    display: "inline-block",
-  };
 
   return (
     <main style={{ maxWidth: 800, margin: "40px auto", padding: 16 }}>
@@ -72,32 +61,26 @@ export default async function DashboardPage() {
           }}
         >
           {canEdit && (
-            <Link href="/dashboard/invite" style={buttonStyle}>
+            <Link href="/dashboard/invite" style={{...buttonStyle.base}}>
               ユーザー招待
             </Link>
           )}
 
-          <Link href="/dashboard/contacts" style={buttonStyle}>
+          <Link href="/dashboard/contacts" style={{...buttonStyle.base}}>
             連絡先
           </Link>
 
-          <Link href="/dashboard/templates" style={buttonStyle}>
+          <Link href="/dashboard/templates" style={{...buttonStyle.base}}>
             テンプレ一覧
           </Link>
 
           {canEdit && (
-            <Link
-              href="/dashboard/templates/new"
-              style={{
-                ...buttonStyle,
-                background: "#fafafa",
-              }}
-            >
+            <Link href="/dashboard/templates/new" style={{...buttonStyle.base}}>
               テンプレ作成
             </Link>
           )}
 
-          <Link href="/dashboard/campaigns" style={buttonStyle}>
+          <Link href="/dashboard/campaigns" style={{...buttonStyle.base}}>
             配信履歴
           </Link>
         </div>

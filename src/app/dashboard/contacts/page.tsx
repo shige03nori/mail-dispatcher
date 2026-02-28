@@ -22,7 +22,7 @@ export default async function ContactsPage() {
         {canEdit && (
           <Link
             href="/dashboard/contacts/new"
-            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
+            className="btn"
           >
             新規作成
           </Link>

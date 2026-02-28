@@ -112,12 +112,16 @@ export default function ContactsTable({
   return (
     <div>
       {/* 検索 + 再読み込み */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "nowrap", width: "100%" }}>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="検索（氏名/会社/メール/電話/メモ）"
-          style={formStyle.input}
+          style={{
+            ...formStyle.input,
+            flex: 1,
+            maxWidth: 720,
+          }}
         />
         <button
           onClick={async () => {
@@ -140,7 +144,7 @@ export default function ContactsTable({
               setMsg("更新失敗");
             }
           }}
-          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
+          className="btn"
         >
           再読み込み
         </button>
@@ -150,11 +154,13 @@ export default function ContactsTable({
           <button
             onClick={goCompose}
             disabled={selectedCount === 0 || isPending}
-            style={{ 
-                        ...buttonStyle.base,
-                        ...buttonStyle.primary
-                   }}
-            title={selectedCount === 0 ? "送信先を選択してください" : "選択した連絡先へメールを作成"}
+            className="btn btn-primary"
+            title={
+              selectedCount === 0
+                ? "送信先を選択してください"
+                : "選択した連絡先へメールを作成"
+            }
+            style={{ marginLeft: "auto" }}
           >
             メール作成
           </button>
@@ -222,7 +228,7 @@ export default function ContactsTable({
 
             return (
               <tr key={c.id}>
-                {/* ★追加: 行チェック */}
+                {/* 行チェック */}
                 <td style={{ padding: 8, borderBottom: "1px solid #f2f2f2" }}>
                   <input
                     type="checkbox"
@@ -246,6 +252,7 @@ export default function ContactsTable({
                         padding: "2px 6px",
                         borderRadius: 999,
                         background: "#fff3cd",
+                        color: "#762d03",
                         fontSize: 12,
                       }}
                     >
@@ -259,14 +266,14 @@ export default function ContactsTable({
                   <div style={{ display: "flex", gap: 8 }}>
                     <Link
                       href={`/dashboard/contacts/${c.id}`}
-                      style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8 }}
+                      className="btn"
                     >
                       詳細/編集
                     </Link>
                     {canEdit ? (
                       <button
                         onClick={() => del(c.id)}
-                        style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8 }}
+                        className="btn btn-danger"
                       >
                         削除
                       </button>

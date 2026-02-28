@@ -11,12 +11,7 @@ export function LogoutButton() {
   return (
     <button
       onClick={logout}
-      style={{
-        padding: "8px 12px",
-        border: "1px solid #ddd",
-        borderRadius: 8,
-        cursor: "pointer",
-      }}
+      className="btn btn-danger"
     >
       ログアウト
     </button>

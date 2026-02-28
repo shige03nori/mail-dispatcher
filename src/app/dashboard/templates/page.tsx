@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { tableStyle } from "@/lib/ui/tableStyle";
+import { formStyle } from "@/lib/ui/formStyle";
 import { archiveTemplateAction, restoreTemplateAction } from "./actions";
 
 export default async function TemplatesPage({
@@ -48,14 +49,14 @@ export default async function TemplatesPage({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>テンプレート</h1>
         <div style={{ display: "flex", gap: 10 }}>
-          <Link href="/dashboard/contacts" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}>
+          <Link href="/dashboard/contacts" className="btn">
             連絡先
           </Link>
-          <Link href="/dashboard/campaigns" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}>
+          <Link href="/dashboard/campaigns" className="btn">
             Campaigns
           </Link>
           {canEdit && (
-            <Link href="/dashboard/templates/new" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8, fontWeight: 800 }}>
+            <Link href="/dashboard/templates/new" className="btn btn-primary">
               新規作成
             </Link>
           )}
@@ -65,24 +66,24 @@ export default async function TemplatesPage({
       <section style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
         <form style={{ display: "flex", gap: 10, alignItems: "end", flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 240 }}>
-            <label style={{ display: "block", fontSize: 13, color: "#333" }}>検索</label>
+            <label style={{ display: "block", fontSize: 13, color: "#ddd" }}>検索</label>
             <input
               name="q"
               defaultValue={q}
               placeholder="テンプレ名 / 件名"
-              style={{ width: "100%", padding: 10 }}
+              style={{ ...formStyle.input }}
             />
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 13, color: "#333" }}>表示</label>
-            <select name="archived" defaultValue={archived ? "1" : "0"} style={{ width: 160, padding: 10 }}>
+            <label style={{ display: "block", fontSize: 13, color: "#ddd" }}>表示</label>
+            <select name="archived" defaultValue={archived ? "1" : "0"} style={{ ...formStyle.select, width: 160, padding: 10 }}>
               <option value="0">有効のみ</option>
               <option value="1">アーカイブ</option>
             </select>
           </div>
 
-          <button type="submit" style={{ padding: "10px 14px", border: "1px solid #ddd", borderRadius: 10, fontWeight: 800 }}>
+          <button type="submit" className="btn">
             絞り込む
           </button>
         </form>
@@ -108,12 +109,12 @@ export default async function TemplatesPage({
               {templates.map((t) => (
                 <tr key={t.id}>
                   <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>
-                    <Link href={`/dashboard/templates/${t.id}/edit`} style={{ color: "#111", textDecoration: "underline" }}>
+                    <Link href={`/dashboard/templates/${t.id}/edit`} style={{ textDecoration: "underline" }}>
                       {t.name}
                     </Link>
                   </td>
                   <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>{t.subject}</td>
-                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2", color: "#111" }}>
+                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2"}}>
                     {t.updatedAt.toLocaleString("ja-JP")}
                   </td>
                   <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>
@@ -121,14 +122,14 @@ export default async function TemplatesPage({
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                         <Link
                           href={`/dashboard/compose?ids=&templateId=${encodeURIComponent(t.id)}`}
-                          style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8 }}
+                          className="btn"
                         >
                           使う
                         </Link>
 
                         {t.isArchived ? (
                           <form action={restoreTemplateAction.bind(null, t.id)}>
-                            <button type="submit" style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8 }}>
+                            <button type="submit" className="btn btn-success">
                               復元
                             </button>
                           </form>
@@ -136,7 +137,7 @@ export default async function TemplatesPage({
                           <form action={archiveTemplateAction.bind(null, t.id)}>
                             <button
                               type="submit"
-                              style={{ padding: "6px 10px", border: "1px solid #ddd", borderRadius: 8, background: "#fff3cd", color: "#111" }}
+                              className="btn btn-danger"
                             >
                               アーカイブ
                             </button>

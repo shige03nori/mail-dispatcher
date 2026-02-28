@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formStyle } from "@/lib/ui/formStyle";
 
 type Initial = {
   id: string;
@@ -62,29 +63,29 @@ export default function ContactForm({
   return (
     <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
       <label style={{ fontWeight: 600 }}>氏名（必須）</label>
-      <input value={name} onChange={(e) => setName(e.target.value)} required disabled={!canEdit} style={{ padding: 10 }} />
+      <input value={name} onChange={(e) => setName(e.target.value)} required disabled={!canEdit} style={{ ...formStyle.input }} />
 
       <label style={{ fontWeight: 600 }}>会社名</label>
-      <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!canEdit} style={{ padding: 10 }} />
+      <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
 
       <label style={{ fontWeight: 600 }}>メール</label>
-      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={{ padding: 10 }} />
+      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
 
       <label style={{ fontWeight: 600 }}>電話</label>
-      <input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!canEdit} style={{ padding: 10 }} />
+      <input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
 
       <label style={{ fontWeight: 600 }}>メモ</label>
-      <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!canEdit} style={{ padding: 10, minHeight: 120 }} />
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!canEdit} style={{ ...formStyle.textarea }} />
 
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         {canEdit ? (
-          <button type="submit" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}>
+          <button type="submit" className="btn btn-primary">
             {mode === "create" ? "作成" : "更新"}
           </button>
         ) : (
           <span style={{ color: "#888" }}>閲覧のみ（VIEWER）</span>
         )}
-        <a href="/dashboard/contacts" style={{ padding: "8px 12px" }}>
+        <a href="/dashboard/contacts" className="btn">
           一覧へ戻る
         </a>
       </div>
