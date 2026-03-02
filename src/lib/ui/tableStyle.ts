@@ -2,10 +2,10 @@ export const tableStyle = {
   table: {
     width: "100%",
     borderCollapse: "collapse" as const,
-    color: "#111",
+    color: "#fff",
   },
   thead: {
-    background: "#fafafa",
+    background: "#fff",
   },
   th: {
     textAlign: "left" as const,
@@ -19,6 +19,6 @@ export const tableStyle = {
   td: {
     padding: 10,
     borderTop: "1px solid #f2f2f2",
-    color: "#111",
+    color: "#fff",
   },
 };

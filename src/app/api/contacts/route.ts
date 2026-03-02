@@ -2,24 +2,36 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 
+function parseGroups(raw: string): string[] {
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+}
+
 type Body = {
   name?: string;
   companyName?: string;
   email?: string;
   phone?: string;
   note?: string;
+  groupIds?: string[];
 };
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ ok: false }, { status: 401 });
 
+  const { searchParams } = new URL(req.url);
+  const groupId = searchParams.get("groupId");
+
   const contacts = await prisma.contact.findMany({
     where: { organizationId: session.organizationId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json({ ok: true, contacts });
+  const result = contacts
+    .map((c) => ({ ...c, groups: parseGroups(c.groups) }))
+    .filter((c) => !groupId || c.groups.includes(groupId));
+
+  return NextResponse.json({ ok: true, contacts: result });
 }
 
 export async function POST(req: Request) {
@@ -35,17 +47,15 @@ export async function POST(req: Request) {
   const email = (body?.email ?? "").trim().toLowerCase() || null;
   const phone = (body?.phone ?? "").trim() || null;
   const note = (body?.note ?? "").trim() || null;
+  const groupIds = Array.isArray(body?.groupIds) ? (body.groupIds as string[]) : [];
 
   if (!name) return NextResponse.json({ ok: false, error: "name_required" }, { status: 400 });
 
-  // （B方針）emailが入力されている場合だけ重複チェック（任意）
   if (email) {
     const dup = await prisma.contact.findFirst({
       where: { organizationId: session.organizationId, email },
     });
-    if (dup) {
-      return NextResponse.json({ ok: false, error: "email_already_exists" }, { status: 409 });
-    }
+    if (dup) return NextResponse.json({ ok: false, error: "email_already_exists" }, { status: 409 });
   }
 
   const created = await prisma.contact.create({
@@ -56,10 +66,11 @@ export async function POST(req: Request) {
       email,
       phone,
       note,
+      groups: JSON.stringify(groupIds),
       createdByUserId: session.userId,
       updatedByUserId: session.userId,
     },
   });
 
-  return NextResponse.json({ ok: true, contact: created });
+  return NextResponse.json({ ok: true, contact: { ...created, groups: parseGroups(created.groups) } });
 }

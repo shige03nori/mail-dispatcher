@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { createTemplateAction } from "../actions";
-import { buttonStyle } from "@/lib/ui/buttonStyle";
 import { formStyle } from "@/lib/ui/formStyle";
 
 export default async function TemplateNewPage({
@@ -20,7 +19,7 @@ export default async function TemplateNewPage({
     <main style={{ maxWidth: 900, margin: "40px auto", padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>テンプレ作成</h1>
-        <Link href="/dashboard/templates" className="btn">
+        <Link href="/dashboard/templates" className="btn-custom01">
           一覧へ
         </Link>
       </div>
@@ -59,7 +58,7 @@ export default async function TemplateNewPage({
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn-custom01 btn-custom01-primary"
           >
             作成
           </button>

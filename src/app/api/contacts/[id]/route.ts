@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 
+function parseGroups(raw: string): string[] {
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+}
+
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) return NextResponse.json({ ok: false }, { status: 401 });
@@ -11,10 +15,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const contact = await prisma.contact.findFirst({
     where: { id, organizationId: session.organizationId },
   });
-
   if (!contact) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
 
-  return NextResponse.json({ ok: true, contact });
+  return NextResponse.json({ ok: true, contact: { ...contact, groups: parseGroups(contact.groups) } });
 }
 
 export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -35,15 +38,16 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   const email = (body?.email ?? "").toString().trim().toLowerCase() || null;
   const phone = (body?.phone ?? "").toString().trim() || null;
   const note = (body?.note ?? "").toString().trim() || null;
+  const groupIds = Array.isArray(body?.groupIds) ? (body.groupIds as string[]) : [];
 
   if (!name) return NextResponse.json({ ok: false, error: "name_required" }, { status: 400 });
 
   const updated = await prisma.contact.update({
     where: { id },
-    data: { name, companyName, email, phone, note, updatedByUserId: session.userId,},
+    data: { name, companyName, email, phone, note, groups: JSON.stringify(groupIds), updatedByUserId: session.userId },
   });
 
-  return NextResponse.json({ ok: true, contact: updated });
+  return NextResponse.json({ ok: true, contact: { ...updated, groups: parseGroups(updated.groups) } });
 }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {

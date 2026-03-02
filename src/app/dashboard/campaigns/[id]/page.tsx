@@ -75,15 +75,15 @@ export default async function CampaignDetailPage({
       </div>
 
       {/* サマリー */}
-      <div style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
+      <div style={{ marginTop: 16, padding: 12, border: "1px solid #333", borderRadius: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
           <div style={{ fontSize: 14 }}>
             status: <b>{campaign.status}</b>
           </div>
-          <div style={{ fontSize: 14, color: "#555" }}>
+          <div style={{ fontSize: 14, color: "#aaa" }}>
             作成: {new Date(campaign.createdAt).toLocaleString("ja-JP")}
           </div>
-          <div style={{ fontSize: 14, color: "#555" }}>
+          <div style={{ fontSize: 14, color: "#aaa" }}>
             更新: {new Date(campaign.updatedAt).toLocaleString("ja-JP")}
           </div>
         </div>
@@ -98,7 +98,7 @@ export default async function CampaignDetailPage({
         <div style={{ marginTop: 10, display: "flex", gap: 12, flexWrap: "wrap", fontSize: 14 }}>
           <span>合計: <b>{campaign.totalCount}</b></span>
           <span>送信: <b>{campaign.sentCount}</b></span>
-          <span style={{ color: campaign.failedCount > 0 ? "#b91c1c" : "#111" }}>
+          <span style={{ color: campaign.failedCount > 0 ? "#f87171" : "inherit" }}>
             失敗: <b>{campaign.failedCount}</b>
           </span>
           <span>スキップ: <b>{campaign.skippedCount}</b></span>
@@ -106,18 +106,18 @@ export default async function CampaignDetailPage({
       </div>
 
       {/* 本文スナップショット（必要なら折りたたみ） */}
-      <details style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
+      <details style={{ marginTop: 16, padding: 12, border: "1px solid #333", borderRadius: 10 }}>
         <summary style={{ cursor: "pointer", fontWeight: 800 }}>本文スナップショット</summary>
         <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 13, color: "#333", marginBottom: 6 }}>text</div>
-          <pre style={{ whiteSpace: "pre-wrap", background: "#fafafa", padding: 10, borderRadius: 8 }}>
+          <div style={{ fontSize: 13, color: "#aaa", marginBottom: 6 }}>text</div>
+          <pre style={{ whiteSpace: "pre-wrap", background: "#1a1a1a", color: "#fff", padding: 10, borderRadius: 8 }}>
             {campaign.textBodySnapshot}
           </pre>
 
           {campaign.htmlBodySnapshot && (
             <>
-              <div style={{ fontSize: 13, color: "#333", marginTop: 10, marginBottom: 6 }}>html</div>
-              <pre style={{ whiteSpace: "pre-wrap", background: "#fafafa", padding: 10, borderRadius: 8 }}>
+              <div style={{ fontSize: 13, color: "#aaa", marginTop: 10, marginBottom: 6 }}>html</div>
+              <pre style={{ whiteSpace: "pre-wrap", background: "#1a1a1a", color: "#fff", padding: 10, borderRadius: 8 }}>
                 {campaign.htmlBodySnapshot}
               </pre>
             </>
@@ -130,8 +130,8 @@ export default async function CampaignDetailPage({
         <h2 style={{ fontSize: 16, fontWeight: 800 }}>送信明細</h2>
 
         <div style={{ marginTop: 10, border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ background: "#fafafa" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
+            <thead style={{ background: "#fff" }}>
               <tr>
                 {["宛先", "名前", "状態", "更新", "messageId", "エラー"].map((h) => (
                   <th key={h} style={tableStyle.th}>
@@ -148,13 +148,13 @@ export default async function CampaignDetailPage({
                   <td style={{ padding: 10 }}>
                     <RecipientBadge status={r.status} />
                   </td>
-                  <td style={{ padding: 10, color: "#555", whiteSpace: "nowrap" }}>
+                  <td style={{ padding: 10, color: "#aaa", whiteSpace: "nowrap" }}>
                     {new Date(r.updatedAt).toLocaleString("ja-JP")}
                   </td>
                   <td style={{ padding: 10, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
                     {r.providerMessageId ?? ""}
                   </td>
-                  <td style={{ padding: 10, color: r.status === "FAILED" ? "#b91c1c" : "#555" }}>
+                  <td style={{ padding: 10, color: r.status === "FAILED" ? "#f87171" : "#aaa" }}>
                     {r.errorMessage ?? ""}
                   </td>
                 </tr>
@@ -162,7 +162,7 @@ export default async function CampaignDetailPage({
 
               {recipients.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: 12, color: "#666" }}>
+                  <td colSpan={6} style={{ padding: 12, color: "#aaa" }}>
                     明細がありません
                   </td>
                 </tr>
@@ -171,7 +171,7 @@ export default async function CampaignDetailPage({
           </table>
         </div>
 
-        <p style={{ marginTop: 10, fontSize: 12, color: "#666" }}>
+        <p style={{ marginTop: 10, fontSize: 12, color: "#aaa" }}>
           ※ まずは最大300件表示。大量配信するならページング/フィルタを追加するのがおすすめ。
         </p>
       </section>

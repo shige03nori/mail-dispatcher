@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { updateTemplateAction } from "../../actions";
-import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 export default async function TemplateEditPage({
   params,
@@ -39,7 +38,7 @@ export default async function TemplateEditPage({
     <main style={{ maxWidth: 900, margin: "40px auto", padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>テンプレ編集</h1>
-        <Link href="/dashboard/templates" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}>
+        <Link href="/dashboard/templates" className="btn-custom01">
           一覧へ
         </Link>
       </div>
@@ -94,7 +93,7 @@ export default async function TemplateEditPage({
               />
             </details>
 
-            <button type="submit" style={{ ...buttonStyle.base, ...buttonStyle.primary }}>
+            <button type="submit" className="btn-custom01 btn-custom01-primary">
               保存
             </button>
           </form>

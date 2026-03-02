@@ -3,6 +3,10 @@ import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import ContactForm from "../ui/ContactForm";
 
+function parseGroups(raw: string): string[] {
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+}
+
 export default async function EditContactPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -31,6 +35,7 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
             email: contact.email ?? "",
             phone: contact.phone ?? "",
             note: contact.note ?? "",
+            groupIds: parseGroups(contact.groups),
           }}
         />
       </div>

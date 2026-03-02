@@ -3,7 +3,6 @@ import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "./LogoutButton";
 import Link from "next/link";
-import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -60,27 +59,33 @@ export default async function DashboardPage() {
             alignItems: "center",
           }}
         >
+          {session.role === "ADMIN" && (
+            <Link href="/dashboard/users" className="btn-custom01">
+              ユーザー管理
+            </Link>
+          )}
+
           {canEdit && (
-            <Link href="/dashboard/invite" style={{...buttonStyle.base}}>
+            <Link href="/dashboard/invite" className="btn-custom01">
               ユーザー招待
             </Link>
           )}
 
-          <Link href="/dashboard/contacts" style={{...buttonStyle.base}}>
+          <Link href="/dashboard/contacts" className="btn-custom01">
             連絡先
           </Link>
 
-          <Link href="/dashboard/templates" style={{...buttonStyle.base}}>
+          <Link href="/dashboard/templates" className="btn-custom01">
             テンプレ一覧
           </Link>
 
           {canEdit && (
-            <Link href="/dashboard/templates/new" style={{...buttonStyle.base}}>
+            <Link href="/dashboard/templates/new" className="btn-custom01">
               テンプレ作成
             </Link>
           )}
 
-          <Link href="/dashboard/campaigns" style={{...buttonStyle.base}}>
+          <Link href="/dashboard/campaigns" className="btn-custom01">
             配信履歴
           </Link>
         </div>

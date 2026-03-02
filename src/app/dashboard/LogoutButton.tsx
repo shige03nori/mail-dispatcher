@@ -11,7 +11,7 @@ export function LogoutButton() {
   return (
     <button
       onClick={logout}
-      className="btn btn-danger"
+      className="btn-custom01 btn-custom01-danger"
     >
       ログアウト
     </button>

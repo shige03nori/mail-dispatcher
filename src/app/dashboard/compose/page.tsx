@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/email";
 import { tableStyle } from "@/lib/ui/tableStyle";
-import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 function toErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
@@ -282,10 +281,7 @@ export default async function ComposePage({
     <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>メール作成</h1>
-        <Link
-          href="/dashboard/contacts"
-          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
-        >
+        <Link href="/dashboard/contacts" className="btn-custom01">
           連絡先へ戻る
         </Link>
       </div>
@@ -314,18 +310,7 @@ export default async function ComposePage({
               テンプレがまだありません（先に作成してください）
             </div>
             <div style={{ marginTop: 10 }}>
-              <Link
-                href="/dashboard/templates/new"
-                style={{
-                  display: "inline-block",
-                  padding: "8px 12px",
-                  border: "1px solid #ddd",
-                  borderRadius: 8,
-                  fontWeight: 800,
-                  color: "#111",
-                  background: "#fafafa",
-                }}
-              >
+              <Link href="/dashboard/templates/new" className="btn-custom01">
                 テンプレを作成
               </Link>
             </div>
@@ -347,7 +332,7 @@ export default async function ComposePage({
             </select>
             <input type="hidden" name="ids" value={ids.join(",")} />
             <div style={{ marginTop: 10 }}>
-              <button type="submit" style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}>
+              <button type="submit" className="btn-custom01">
                 プレビューに反映
               </button>
             </div>
@@ -391,13 +376,7 @@ export default async function ComposePage({
           </details>
 
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 8 }}>
-            <button
-              type="submit"
-              style={{
-                ...buttonStyle.base,
-                ...buttonStyle.primary,
-              }}
-            >
+            <button type="submit" className="btn-custom01 btn-custom01-primary">
               送信する（{withEmail.length}件）
             </button>
             <span style={{ fontSize: 12, color: "#666" }}>

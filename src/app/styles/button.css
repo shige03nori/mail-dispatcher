@@ -1,92 +1,81 @@
-/* 共通ボタン */
-.btn {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  font-weight: 600;
-
+/* ===== プッシュボタン（カスタム） ===== */
+.btn-custom01{
+  overflow: clip;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  line-height: 1;
+  gap: 6px;
+  padding: 1px 8px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background: #fff100;
+  color: #212529;
+  font-weight: 700;
+  font-size: 0.875rem;
   white-space: nowrap;
+  text-decoration: none;
 
-  transition: background-color 0.15s ease,
-              border-color 0.15s ease,
-              filter 0.15s ease;
+  /* 影レイヤーを box-shadow で表現 */
+  box-shadow:
+    0 6px 0 -2 #ccc100,
+    0 11px 0 -2 rgba(0,0,0,0.2);
+
+  transition: transform .2s, box-shadow .2s;
 }
 
-/* 共通 hover（ほんのり反応） */
-.btn:hover {
-  background: #313131;
-  filter: brightness(0.95);
+.btn-custom01:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 0 #ccc100,
+    0 7px 0 0 rgba(0,0,0,0.2);
 }
 
-/* ===== バリエーション ===== */
+.btn-custom01:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #ccc100,
+    0 1px 0 0 rgba(0,0,0,0.2);
+}
+
+
+.btn-custom01:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== カラーバリエーション ===== */
 
 /* 主操作（オレンジ） */
-.btn-primary {
+.btn-custom01-primary {
   background: #f97316;
   color: #fff;
-  border-color: #f97316;
-}
-.btn-primary:hover {
-  background: #ea580c;
-  border-color: #ea580c;
 }
 
 /* 危険操作（アーカイブ） */
-.btn-danger {
+.btn-custom01-danger {
   background: #dc2626;
   color: #fff;
-  border-color: #dc2626;
-}
-.btn-danger:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
 }
 
 /* 回復操作（復元） */
-.btn-success {
+.btn-custom01-success {
   background: #16a34a;
   color: #fff;
-  border-color: #16a34a;
-}
-.btn-success:hover {
-  background: #15803d;
-  border-color: #15803d;
 }
 
 /* 紺色（ネイビー） */
-.btn-navy {
-  background: #0f172a; /* slate-900 */
+.btn-custom01-navy {
+  background: #0f172a;
   color: #fff;
-  border-color: #0f172a;
-}
-.btn-navy:hover {
-  background: #020617; /* さらに濃い紺 */
-  border-color: #020617;
 }
 
 /* 控えめ（白背景） */
-.btn-secondary {
+.btn-custom01-secondary {
   background: #fff;
+  border-color: #333;
   color: #111;
-}
-.btn-secondary:hover {
-  background: #f5f5f5;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-loading {
-  pointer-events: none;
-  opacity: 0.7;
 }
 
 /* 左上ダッシュボード戻りアイコン */

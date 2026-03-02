@@ -49,21 +49,15 @@ export default async function TemplatesPage({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>テンプレート</h1>
         <div style={{ display: "flex", gap: 10 }}>
-          <Link href="/dashboard/contacts" className="btn">
-            連絡先
-          </Link>
-          <Link href="/dashboard/campaigns" className="btn">
-            Campaigns
-          </Link>
           {canEdit && (
-            <Link href="/dashboard/templates/new" className="btn btn-primary">
+            <Link href="/dashboard/templates/new" className="btn-custom01 btn-custom01-primary">
               新規作成
             </Link>
           )}
         </div>
       </div>
 
-      <section style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
+      <section style={{ marginTop: 16, padding: 12, border: "1px solid #333", borderRadius: 10 }}>
         <form style={{ display: "flex", gap: 10, alignItems: "end", flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 240 }}>
             <label style={{ display: "block", fontSize: 13, color: "#ddd" }}>検索</label>
@@ -83,7 +77,7 @@ export default async function TemplatesPage({
             </select>
           </div>
 
-          <button type="submit" className="btn">
+          <button type="submit" className="btn-custom01">
             絞り込む
           </button>
         </form>
@@ -97,8 +91,8 @@ export default async function TemplatesPage({
 
       <section style={{ marginTop: 16 }}>
         <div style={{ border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ background: "#fafafa" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
+            <thead style={{ background: "#fff" }}>
               <tr>
                 {["テンプレ名", "件名", "更新日時", "操作"].map((h) => (
                   <th key={h} style={tableStyle.th}>{h}</th>
@@ -108,28 +102,28 @@ export default async function TemplatesPage({
             <tbody>
               {templates.map((t) => (
                 <tr key={t.id}>
-                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>
-                    <Link href={`/dashboard/templates/${t.id}/edit`} style={{ textDecoration: "underline" }}>
+                  <td style={tableStyle.td}>
+                    <Link href={`/dashboard/templates/${t.id}/edit`} style={{ textDecoration: "underline", color: "#fff" }}>
                       {t.name}
                     </Link>
                   </td>
-                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>{t.subject}</td>
-                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2"}}>
+                  <td style={tableStyle.td}>{t.subject}</td>
+                  <td style={tableStyle.td}>
                     {t.updatedAt.toLocaleString("ja-JP")}
                   </td>
-                  <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>
+                  <td style={tableStyle.td}>
                     {canEdit ? (
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                         <Link
                           href={`/dashboard/compose?ids=&templateId=${encodeURIComponent(t.id)}`}
-                          className="btn"
+                          className="btn-custom01"
                         >
                           使う
                         </Link>
 
                         {t.isArchived ? (
                           <form action={restoreTemplateAction.bind(null, t.id)}>
-                            <button type="submit" className="btn btn-success">
+                            <button type="submit" className="btn-custom01 btn-custom01-success">
                               復元
                             </button>
                           </form>
@@ -137,7 +131,7 @@ export default async function TemplatesPage({
                           <form action={archiveTemplateAction.bind(null, t.id)}>
                             <button
                               type="submit"
-                              className="btn btn-danger"
+                              className="btn-custom01 btn-custom01-danger"
                             >
                               アーカイブ
                             </button>
@@ -145,14 +139,14 @@ export default async function TemplatesPage({
                         )}
                       </div>
                     ) : (
-                      <span style={{ color: "#666", fontSize: 12 }}>閲覧のみ</span>
+                      <span style={{ color: "#aaa", fontSize: 12 }}>閲覧のみ</span>
                     )}
                   </td>
                 </tr>
               ))}
               {templates.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ padding: 12, color: "#666" }}>
+                  <td colSpan={4} style={{ padding: 12, color: "#aaa" }}>
                     テンプレがありません
                   </td>
                 </tr>

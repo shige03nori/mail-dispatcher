@@ -78,17 +78,19 @@ model Organization {
   auditLogs      AuditLog[]
   emailTemplates EmailTemplate[]
   emailCampaigns EmailCampaign[]
+  contactGroups  ContactGroup[]
 
   @@index([domain])
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String?
-  status    UserStatus @default(INVITED)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String?
+  passwordHash String?
+  status       UserStatus @default(INVITED)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   memberships        Membership[]
   createdInvitations Invitation[] @relation("InvitationCreatedBy")
@@ -195,6 +197,8 @@ model Contact {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdBy    User         @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   updatedBy    User?        @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  groups String @default("[]") // JSON array of ContactGroup IDs
 
   sendHistory        SendHistory[]
   campaignRecipients EmailCampaignRecipient[]
@@ -378,6 +382,25 @@ model EmailCampaign {
 
   @@index([organizationId, createdAt])
   @@index([organizationId, status, updatedAt])
+}
+
+/**
+ * =========================
+ * ContactGroup / ContactGroupMember
+ * =========================
+ */
+
+model ContactGroup {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
 }
 
 model EmailCampaignRecipient {

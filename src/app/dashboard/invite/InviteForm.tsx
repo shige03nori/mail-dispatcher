@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { formStyle } from "@/lib/ui/formStyle";
-import { buttonStyle } from "@/lib/ui/buttonStyle";
 
 export default function InviteForm() {
   const [email, setEmail] = useState("");
@@ -46,10 +45,7 @@ export default function InviteForm() {
         <option value="EDITOR">EDITOR（編集可）</option>
       </select>
 
-      <button type="submit" style={{ 
-                        ...buttonStyle.base,
-                        ...buttonStyle.primary,
-                   }}>
+      <button type="submit" className="btn-custom01 btn-custom01-primary">
         招待リンクを発行
       </button>
 
