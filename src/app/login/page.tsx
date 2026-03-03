@@ -86,7 +86,7 @@ export default function LoginPage() {
   }
 
   const containerStyle = {
-    maxWidth: 480,
+    maxWidth: 540,
     margin: "60px auto",
     padding: 24,
     border: "1px solid #333",
@@ -125,7 +125,7 @@ export default function LoginPage() {
                   type="button"
                   disabled={pwLoading}
                   onClick={() => loginAsDemo(account.email)}
-                  className="btn-custom01 btn-custom01-navy"
+                  className="btn-custom01 btn-custom01-secondary"
                   style={{ width: "100%", fontSize: 13 }}
                 >
                   <span className="btn-custom01-front">{account.label}</span>
