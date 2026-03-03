@@ -2,14 +2,25 @@
 
 import { useState } from "react";
 import { formStyle } from "@/lib/ui/formStyle";
+import { invitationSchema } from "@/lib/schemas/invitation";
 
 export default function InviteForm() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"VIEWER" | "EDITOR">("VIEWER");
   const [status, setStatus] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
 
   async function submit(e: React.SyntheticEvent) {
     e.preventDefault();
+    setEmailError("");
+
+    const parsed = invitationSchema.safeParse({ email, role });
+    if (!parsed.success) {
+      const emailIssue = parsed.error.issues.find((i) => i.path[0] === "email");
+      if (emailIssue) setEmailError(emailIssue.message);
+      return;
+    }
+
     setStatus("送信中...");
 
     const res = await fetch("/api/invitations/create", {
@@ -35,9 +46,9 @@ export default function InviteForm() {
         onChange={(e) => setEmail(e.target.value)}
         type="email"
         placeholder="user@example.com"
-        required
-        style={formStyle.input}
+        style={{ ...formStyle.input, ...(emailError ? { borderColor: "#f87171" } : {}) }}
       />
+      {emailError && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{emailError}</div>}
 
       <label style={{ fontWeight: 600 }}>権限</label>
       <select value={role} onChange={(e) => setRole(e.target.value as "VIEWER" | "EDITOR")} style={formStyle.select}>

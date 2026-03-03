@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formStyle } from "@/lib/ui/formStyle";
+import { contactSchema } from "@/lib/schemas/contact";
 
 type Group = { id: string; name: string };
 
@@ -35,6 +36,7 @@ export default function ContactForm({
   const [newGroupName, setNewGroupName] = useState("");
   const [groupMsg, setGroupMsg] = useState("");
   const [msg, setMsg] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/api/groups")
@@ -78,9 +80,21 @@ export default function ContactForm({
 
   async function submit(e: React.SyntheticEvent) {
     e.preventDefault();
-    setMsg("保存中...");
+    setErrors({});
 
     const payload = { name, companyName, email, phone, note, groupIds };
+    const parsed = contactSchema.safeParse(payload);
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setMsg("保存中...");
 
     const res =
       mode === "create"
@@ -110,13 +124,15 @@ export default function ContactForm({
   return (
     <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
       <label style={{ fontWeight: 600 }}>氏名（必須）</label>
-      <input value={name} onChange={(e) => setName(e.target.value)} required disabled={!canEdit} style={{ ...formStyle.input }} />
+      <input value={name} onChange={(e) => setName(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input, ...(errors.name ? { borderColor: "#f87171" } : {}) }} />
+      {errors.name && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{errors.name}</div>}
 
       <label style={{ fontWeight: 600 }}>会社名</label>
       <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
 
       <label style={{ fontWeight: 600 }}>メール</label>
-      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
+      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input, ...(errors.email ? { borderColor: "#f87171" } : {}) }} />
+      {errors.email && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{errors.email}</div>}
 
       <label style={{ fontWeight: 600 }}>電話</label>
       <input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
@@ -172,7 +188,7 @@ export default function ContactForm({
               style={{ ...formStyle.input, flex: 1 }}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); createGroup(); } }}
             />
-            <button type="button" onClick={createGroup} className="btn-custom01">
+            <button type="button" onClick={createGroup} className="btn-custom01 btn-custom01-success" style={{ marginTop: -2, marginBottom: 4}}>
               追加
             </button>
           </div>
@@ -191,7 +207,7 @@ export default function ContactForm({
           <span style={{ color: "#888" }}>閲覧のみ（VIEWER）</span>
         )}
         <Link href="/dashboard/contacts" className="btn-custom01">
-          一覧へ戻る
+          連絡先一覧へ戻る
         </Link>
       </div>
 

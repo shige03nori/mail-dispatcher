@@ -20,6 +20,7 @@ export default async function CampaignDetailPage({
     select: {
       id: true,
       status: true,
+      scheduledAt: true,
       templateNameSnapshot: true,
       subjectSnapshot: true,
       textBodySnapshot: true,
@@ -44,6 +45,7 @@ export default async function CampaignDetailPage({
     take: 300, // MVP
     select: {
       id: true,
+      contactId: true,
       emailSnapshot: true,
       contactNameSnapshot: true,
       status: true,
@@ -53,24 +55,36 @@ export default async function CampaignDetailPage({
     },
   });
 
+  const canEdit = session.role !== "VIEWER";
+  // 再送信用: メールアドレスがある宛先のcontactIdを収集
+  const resendIds = recipients
+    .filter((r) => r.contactId && r.emailSnapshot)
+    .map((r) => r.contactId as string)
+    .filter((id, i, arr) => arr.indexOf(id) === i); // 重複除去
+
   return (
     <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>キャンペーン詳細</h1>
 
-        <div style={{ display: "flex", gap: 8 }}>
-          <Link
-            href="/dashboard/campaigns"
-            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
-          >
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Link href="/dashboard/campaigns" className="btn-custom01 btn-custom01-secondary">
             一覧へ戻る
           </Link>
           <Link
             href={`/dashboard/compose/result?campaignId=${campaign.id}`}
-            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
+            className="btn-custom01 btn-custom01-secondary"
           >
-            送信結果ページ
+            送信結果
           </Link>
+          {canEdit && resendIds.length > 0 && (
+            <Link
+              href={`/dashboard/compose?ids=${encodeURIComponent(resendIds.join(","))}&from=${campaign.id}`}
+              className="btn-custom01 btn-custom01-primary"
+            >
+              再送信
+            </Link>
+          )}
         </div>
       </div>
 
@@ -88,6 +102,11 @@ export default async function CampaignDetailPage({
           </div>
         </div>
 
+        {campaign.scheduledAt && (
+          <div style={{ marginTop: 8, fontSize: 14 }}>
+            予約日時: <b>{new Date(campaign.scheduledAt).toLocaleString("ja-JP")}</b>
+          </div>
+        )}
         <div style={{ marginTop: 8, fontSize: 14 }}>
           テンプレ: <b>{campaign.templateNameSnapshot ?? "-"}</b>
         </div>

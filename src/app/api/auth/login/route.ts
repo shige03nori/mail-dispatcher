@@ -1,11 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/auth/password";
 import { setSessionCookie } from "@/lib/auth/session";
+import { isRateLimited } from "@/lib/auth/rateLimit";
 
 const ERR = "メールアドレスまたはパスワードが正しくありません";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (isRateLimited(`login:${ip}`)) {
+    return NextResponse.json(
+      { ok: false, error: "試行回数が多すぎます。しばらく待ってから再試行してください。" },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const email = (body?.email ?? "").toString().trim().toLowerCase();
   const password = (body?.password ?? "").toString();

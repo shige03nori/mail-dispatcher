@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { LogoutButton } from "./LogoutButton";
 import Link from "next/link";
+import { ChangePasswordForm } from "@/app/dashboard/ui/ChangePasswordForm";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -25,8 +25,8 @@ export default async function DashboardPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
-        <LogoutButton />
+      <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
+
       </div>
 
       {/* 組織・ユーザー情報 */}
@@ -47,6 +47,7 @@ export default async function DashboardPage() {
         <div>
           <b>ロール</b>: {session.role}
         </div>
+        <ChangePasswordForm hasPassword={!!user?.passwordHash} />
       </section>
 
       {/* アクション */}
@@ -59,6 +60,14 @@ export default async function DashboardPage() {
             alignItems: "center",
           }}
         >
+          <Link href="/dashboard/contacts" className="btn-custom01">
+            連絡先
+          </Link>
+
+          <Link href="/dashboard/contacts/new" className="btn-custom01">
+            連絡先追加
+          </Link>
+
           {session.role === "ADMIN" && (
             <Link href="/dashboard/users" className="btn-custom01">
               ユーザー管理
@@ -70,10 +79,6 @@ export default async function DashboardPage() {
               ユーザー招待
             </Link>
           )}
-
-          <Link href="/dashboard/contacts" className="btn-custom01">
-            連絡先
-          </Link>
 
           <Link href="/dashboard/templates" className="btn-custom01">
             テンプレ一覧

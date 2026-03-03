@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
+import { contactSchema } from "@/lib/schemas/contact";
 
 function parseGroups(raw: string): string[] {
   try { return JSON.parse(raw) as string[]; } catch { return []; }
@@ -33,14 +34,19 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (!existing) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
 
   const body = await req.json().catch(() => null);
-  const name = (body?.name ?? "").toString().trim();
-  const companyName = (body?.companyName ?? "").toString().trim() || null;
-  const email = (body?.email ?? "").toString().trim().toLowerCase() || null;
-  const phone = (body?.phone ?? "").toString().trim() || null;
-  const note = (body?.note ?? "").toString().trim() || null;
-  const groupIds = Array.isArray(body?.groupIds) ? (body.groupIds as string[]) : [];
 
-  if (!name) return NextResponse.json({ ok: false, error: "name_required" }, { status: 400 });
+  const parsed = contactSchema.safeParse(body ?? {});
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    return NextResponse.json({ ok: false, error: firstIssue?.message ?? "validation_error" }, { status: 400 });
+  }
+
+  const name = parsed.data.name.trim();
+  const companyName = (parsed.data.companyName ?? "").trim() || null;
+  const email = (parsed.data.email ?? "").trim().toLowerCase() || null;
+  const phone = (parsed.data.phone ?? "").trim() || null;
+  const note = (parsed.data.note ?? "").trim() || null;
+  const groupIds = parsed.data.groupIds ?? [];
 
   const updated = await prisma.contact.update({
     where: { id },

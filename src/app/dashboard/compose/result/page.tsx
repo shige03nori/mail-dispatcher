@@ -25,6 +25,7 @@ export default async function ComposeResultPage({
       id: true,
       status: true,
       subjectSnapshot: true,
+      scheduledAt: true,
       totalCount: true,
       sentCount: true,
       failedCount: true,
@@ -51,25 +52,37 @@ export default async function ComposeResultPage({
     },
   });
 
+  const isSending = campaign.status === "SENDING";
+  const isScheduled = campaign.status === "SCHEDULED";
+
   return (
     <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
+      {/* 送信中は3秒ごと、予約中は60秒ごとに自動リロード */}
+      {isSending && <meta httpEquiv="refresh" content="3" />}
+      {isScheduled && <meta httpEquiv="refresh" content="60" />}
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>送信結果</h1>
         <div style={{ display: "flex", gap: 8 }}>
-          <Link
-            href="/dashboard/campaigns"
-            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
-          >
+          <Link href="/dashboard/campaigns" className="btn-custom01 btn-custom01-secondary">
             履歴へ
           </Link>
-          <Link
-            href="/dashboard/contacts"
-            style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: 8 }}
-          >
+          <Link href="/dashboard/contacts" className="btn-custom01">
             連絡先へ
           </Link>
         </div>
       </div>
+
+      {isSending && (
+        <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: "#1e3a5f", color: "#93c5fd", fontSize: 14 }}>
+          送信処理中です。このページは自動的に更新されます...
+        </div>
+      )}
+      {isScheduled && campaign.scheduledAt && (
+        <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 10, background: "#1a2e1a", color: "#86efac", fontSize: 14 }}>
+          予約済み — {new Date(campaign.scheduledAt).toLocaleString("ja-JP")} に自動送信されます
+        </div>
+      )}
 
       <section style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>

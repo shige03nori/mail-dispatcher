@@ -18,7 +18,7 @@
 
   /* 影レイヤーを box-shadow で表現 */
   box-shadow:
-    0 6px 0 -2 #ccc100,
+    0 6px 0 -2 #bdb400,
     0 11px 0 -2 rgba(0,0,0,0.2);
 
   transition: transform .2s, box-shadow .2s;
@@ -27,8 +27,8 @@
 .btn-custom01:hover{
   transform: translateY(3px);
   box-shadow:
-    0 3px 0 0 #ccc100,
-    0 7px 0 0 rgba(0,0,0,0.2);
+    0 3px 0 -1 #ccc100,
+    0 7px 0 -2 rgba(0,0,0,0.2);
 }
 
 .btn-custom01:active{
@@ -51,24 +51,92 @@
 .btn-custom01-primary {
   background: #f97316;
   color: #fff;
+  box-shadow:
+    0 6px 0 -2 #c65d12,
+    0 11px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-primary:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 -1 #c65d12,
+    0 7px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-primary:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #c65d12,
+    0 1px 0 0 rgba(0,0,0,0.2);
 }
 
 /* 危険操作（アーカイブ） */
 .btn-custom01-danger {
   background: #dc2626;
   color: #fff;
+  box-shadow:
+    0 6px 0 -2 #b11f1f,
+    0 11px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-danger:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 -1 #b11f1f,
+    0 7px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-danger:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #b11f1f,
+    0 1px 0 0 rgba(0,0,0,0.2);
 }
 
 /* 回復操作（復元） */
 .btn-custom01-success {
   background: #16a34a;
   color: #fff;
+  box-shadow:
+    0 6px 0 -2 #117d39,
+    0 11px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-success:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 -1 #117d39,
+    0 7px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-success:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #117d39,
+    0 1px 0 0 rgba(0,0,0,0.2);
 }
 
 /* 紺色（ネイビー） */
 .btn-custom01-navy {
   background: #0f172a;
   color: #fff;
+  box-shadow:
+    0 6px 0 -2 #090f1b,
+    0 11px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-navy:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 -1 #090f1b,
+    0 7px 0 -2 rgba(0,0,0,0.2);
+}
+
+.btn-custom01-navy:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #090f1b,
+    0 1px 0 0 rgba(0,0,0,0.2);
 }
 
 /* 控えめ（白背景） */
@@ -76,31 +144,22 @@
   background: #fff;
   border-color: #333;
   color: #111;
+  box-shadow:
+    0 6px 0 -2 #cdcdcd,
+    0 11px 0 -2 rgba(0,0,0,0.2);
 }
 
-/* 左上ダッシュボード戻りアイコン */
-.dashboard-home {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 50;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
-
-  background: #0f172a; /* 紺 */
-  color: #fff;
-  text-decoration: none;
-
-  transition: background-color 0.15s ease, transform 0.1s ease;
+.btn-custom01-secondary:hover{
+  transform: translateY(3px);
+  box-shadow:
+    0 3px 0 -1 #cdcdcd,
+    0 7px 0 -2 rgba(0,0,0,0.2);
 }
 
-.dashboard-home:hover {
-  background: #020617;
-  transform: translateY(-1px);
+.btn-custom01-secondary:active{
+  transform: translateY(6px);
+  box-shadow:
+    0 0px 0 0 #cdcdcd,
+    0 1px 0 0 rgba(0,0,0,0.2);
 }
+

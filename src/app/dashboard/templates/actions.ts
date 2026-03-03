@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { templateSchema } from "@/lib/schemas/template";
 
 function norm(s: unknown): string {
   return String(s ?? "").trim();
@@ -26,9 +27,12 @@ export async function createTemplateAction(formData: FormData) {
   const htmlBodyRaw = String(formData.get("htmlBody") ?? "");
   const htmlBody = htmlBodyRaw.trim() ? htmlBodyRaw : null;
 
-  if (!name) redirect("/dashboard/templates/new?err=name");
-  if (!subject) redirect("/dashboard/templates/new?err=subject");
-  if (!textBody.trim()) redirect("/dashboard/templates/new?err=body");
+  const parsed = templateSchema.safeParse({ name, subject, textBody, htmlBody: htmlBodyRaw });
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const field = String(firstIssue?.path[0] ?? "body");
+    redirect(`/dashboard/templates/new?err=${encodeURIComponent(field)}`);
+  }
 
   try {
     const created = await prisma.emailTemplate.create({
@@ -71,9 +75,12 @@ export async function updateTemplateAction(templateId: string, formData: FormDat
   const htmlBodyRaw = String(formData.get("htmlBody") ?? "");
   const htmlBody = htmlBodyRaw.trim() ? htmlBodyRaw : null;
 
-  if (!name) redirect(`/dashboard/templates/${templateId}/edit?err=name`);
-  if (!subject) redirect(`/dashboard/templates/${templateId}/edit?err=subject`);
-  if (!textBody.trim()) redirect(`/dashboard/templates/${templateId}/edit?err=body`);
+  const parsed = templateSchema.safeParse({ name, subject, textBody, htmlBody: htmlBodyRaw });
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    const field = String(firstIssue?.path[0] ?? "body");
+    redirect(`/dashboard/templates/${templateId}/edit?err=${encodeURIComponent(field)}`);
+  }
 
   try {
     await prisma.emailTemplate.updateMany({

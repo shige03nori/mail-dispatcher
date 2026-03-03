@@ -43,6 +43,7 @@ enum SendStatus {
 
 enum CampaignStatus {
   DRAFT
+  SCHEDULED
   SENDING
   SENT
   FAILED
@@ -360,7 +361,8 @@ model EmailCampaign {
   textBodySnapshot     String
   htmlBodySnapshot     String?
 
-  status CampaignStatus @default(DRAFT)
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
 
   totalCount   Int @default(0)
   sentCount    Int @default(0)

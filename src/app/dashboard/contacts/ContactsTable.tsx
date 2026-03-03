@@ -5,6 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formStyle } from "@/lib/ui/formStyle";
 import { tableStyle } from "@/lib/ui/tableStyle";
+import { ConfirmDialog } from "@/app/dashboard/ui/ConfirmDialog";
 
 type Group = { id: string; name: string };
 
@@ -36,6 +37,8 @@ export default function ContactsTable({
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [msg, setMsg] = useState<string>("");
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const groupMap = useMemo(
     () => new Map(initialGroups.map((g) => [g.id, g.name])),
@@ -99,7 +102,6 @@ export default function ContactsTable({
   }
 
   async function del(id: string) {
-    if (!confirm("削除しますか？")) return;
     setMsg("削除中...");
     const res = await fetch(`/api/contacts/${id}`, { method: "DELETE" });
     if (res.ok) {
@@ -114,6 +116,7 @@ export default function ContactsTable({
       const data = await res.json().catch(() => ({}));
       setMsg(`削除失敗: ${data?.error ?? "unknown"}`);
     }
+    setConfirmId(null);
   }
 
   return (
@@ -159,6 +162,51 @@ export default function ContactsTable({
         >
           再読み込み
         </button>
+
+        {/* エクスポート */}
+        <a
+          href="/api/contacts/export"
+          download
+          className="btn-custom01 btn-custom01-navy"
+        >
+          CSV出力
+        </a>
+
+        {/* インポート */}
+        {canEdit && (
+          <>
+            <label className="btn-custom01 btn-custom01-navy" style={{ cursor: "pointer" }}>
+              CSV取込
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                style={{ display: "none" }}
+                disabled={importing}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setImporting(true);
+                  setMsg("インポート中...");
+                  const form = new FormData();
+                  form.append("file", file);
+                  const res = await fetch("/api/contacts/import", { method: "POST", body: form });
+                  const data = await res.json().catch(() => ({}));
+                  if (data?.ok) {
+                    setMsg(`インポート完了: ${data.created}件追加、${data.skipped}件スキップ`);
+                    // 一覧を再取得
+                    const r2 = await fetch("/api/contacts");
+                    const d2 = await r2.json();
+                    if (d2?.ok) setContacts(d2.contacts);
+                  } else {
+                    setMsg(`インポート失敗: ${data?.error ?? "unknown"}`);
+                  }
+                  e.target.value = "";
+                  setImporting(false);
+                }}
+              />
+            </label>
+          </>
+        )}
 
         {canEdit && (
           <button
@@ -264,7 +312,7 @@ export default function ContactsTable({
                         詳細/編集
                       </Link>
                       {canEdit ? (
-                        <button onClick={() => del(c.id)} className="btn-custom01 btn-custom01-danger">削除</button>
+                        <button onClick={() => setConfirmId(c.id)} className="btn-custom01 btn-custom01-danger">削除</button>
                       ) : (
                         <span style={{ color: "#aaa" }}>閲覧のみ</span>
                       )}
@@ -282,6 +330,14 @@ export default function ContactsTable({
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="連絡先を削除"
+        message="この連絡先を削除しますか？この操作は元に戻せません。"
+        onConfirm={() => confirmId && del(confirmId)}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formStyle } from "@/lib/ui/formStyle";
+import { ConfirmDialog } from "@/app/dashboard/ui/ConfirmDialog";
 
 type Group = { id: string; name: string };
 
@@ -16,6 +17,7 @@ export default function GroupManager({
   const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [newName, setNewName] = useState("");
   const [msg, setMsg] = useState("");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   function updateGroups(next: Group[]) {
     setGroups(next);
@@ -45,9 +47,7 @@ export default function GroupManager({
   }
 
   async function deleteGroup(id: string) {
-    if (!confirm("グループを削除しますか？")) return;
     setMsg("削除中...");
-
     const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
     if (res.ok) {
       updateGroups(groups.filter((g) => g.id !== id));
@@ -56,6 +56,7 @@ export default function GroupManager({
       const data = await res.json().catch(() => ({}));
       setMsg(`削除失敗: ${data?.error ?? res.status}`);
     }
+    setConfirmId(null);
   }
 
   return (
@@ -104,7 +105,7 @@ export default function GroupManager({
                 {g.name}
                 <button
                   type="button"
-                  onClick={() => deleteGroup(g.id)}
+                  onClick={() => setConfirmId(g.id)}
                   style={{
                     background: "transparent",
                     border: "none",
@@ -137,6 +138,14 @@ export default function GroupManager({
           {msg && <div style={{ marginTop: 8, fontSize: 13, color: "#f87171" }}>{msg}</div>}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmId !== null}
+        title="グループを削除"
+        message={`「${groups.find((g) => g.id === confirmId)?.name ?? ""}」を削除しますか？\n連絡先のグループ設定からも外れます。`}
+        onConfirm={() => confirmId && deleteGroup(confirmId)}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }

@@ -1,9 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateToken, sha256 } from "@/lib/auth/token";
 import { sendMagicLink } from "@/lib/mail";
+import { isRateLimited } from "@/lib/auth/rateLimit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (isRateLimited(`magic:${ip}`)) {
+    // 列挙対策のため成功レスポンスを返す（レートリミットであることを隠す）
+    return NextResponse.json({ ok: true });
+  }
+
   const body = await req.json().catch(() => null);
   const email = (body?.email ?? "").toString().trim().toLowerCase();
 

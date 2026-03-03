@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import { tableStyle } from "@/lib/ui/tableStyle";
 import { formStyle } from "@/lib/ui/formStyle";
 
-const STATUS_OPTIONS = ["ALL", "DRAFT", "SENDING", "SENT", "FAILED"] as const;
+const STATUS_OPTIONS = ["ALL", "DRAFT", "SCHEDULED", "SENDING", "SENT", "FAILED"] as const;
 type StatusOpt = (typeof STATUS_OPTIONS)[number];
 
 function clampInt(v: string | undefined, def: number, min: number, max: number) {
@@ -496,6 +496,12 @@ function StatusBadge({ status }: { status: string }) {
 
   if (status === "PENDING")
     return <span style={{ ...base, background: "#e0f2fe", color: "#075985" }}>PENDING</span>;
+
+  if (status === "SCHEDULED")
+    return <span style={{ ...base, background: "#d1fae5", color: "#065f46" }}>SCHEDULED</span>;
+
+  if (status === "SENDING")
+    return <span style={{ ...base, background: "#e0f2fe", color: "#075985" }}>SENDING</span>;
 
   return <span style={{ ...base, background: "#eee", color: "#333" }}>{status}</span>;
 

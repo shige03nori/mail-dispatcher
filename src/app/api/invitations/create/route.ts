@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateToken, sha256 } from "@/lib/auth/token";
 import { getSession } from "@/lib/auth/session";
-
-type Body = {
-  email?: string;
-  role?: "EDITOR" | "VIEWER";
-};
+import { invitationSchema } from "@/lib/schemas/invitation";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -14,13 +10,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
 
-  const body = (await req.json().catch(() => null)) as Body | null;
-  const email = (body?.email ?? "").toString().trim().toLowerCase();
-  const role = body?.role === "EDITOR" ? "EDITOR" : "VIEWER";
+  const body = await req.json().catch(() => null);
 
-  if (!email || !email.includes("@")) {
-    return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });
+  const parsed = invitationSchema.safeParse(body ?? {});
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0];
+    return NextResponse.json({ ok: false, error: firstIssue?.message ?? "validation_error" }, { status: 400 });
   }
+
+  const email = parsed.data.email.toLowerCase();
+  const role = parsed.data.role;
 
   // 24時間有効
   const token = generateToken();

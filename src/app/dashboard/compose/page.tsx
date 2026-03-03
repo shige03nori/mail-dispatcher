@@ -2,18 +2,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
-import { sendEmail } from "@/lib/email";
+import { processCampaign } from "@/lib/email/processCampaign";
 import { tableStyle } from "@/lib/ui/tableStyle";
-
-function toErrorMessage(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  if (typeof e === "string") return e;
-  try {
-    return JSON.stringify(e);
-  } catch {
-    return "send failed";
-  }
-}
 
 function parseIdsParam(idsParam?: string): string[] {
   if (!idsParam) return [];
@@ -33,20 +23,10 @@ function parseIdsParam(idsParam?: string): string[] {
   return unique.slice(0, 500);
 }
 
-// 超ミニ差し込み: {{name}} {{companyName}} {{email}} {{phone}}
-// 必要になったら増やせばOK
-function applyVars(template: string, c: { name: string; companyName: string | null; email: string | null; phone: string | null }) {
-  return template
-    .replaceAll("{{name}}", c.name ?? "")
-    .replaceAll("{{companyName}}", c.companyName ?? "")
-    .replaceAll("{{email}}", c.email ?? "")
-    .replaceAll("{{phone}}", c.phone ?? "");
-}
-
 export default async function ComposePage({
   searchParams,
 }: {
-  searchParams: Promise<{ ids?: string; templateId?: string }>;
+  searchParams: Promise<{ ids?: string; templateId?: string; from?: string }>;
 }) {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -58,6 +38,14 @@ export default async function ComposePage({
 
   const ids = parseIdsParam(sp.ids);
   if (ids.length === 0) redirect("/dashboard/contacts");
+
+  // 再送信元キャンペーンのスナップショットを取得
+  const fromCampaign = sp.from
+    ? await prisma.emailCampaign.findFirst({
+        where: { id: sp.from, organizationId: session.organizationId },
+        select: { subjectSnapshot: true, textBodySnapshot: true, htmlBodySnapshot: true },
+      })
+    : null;
 
   // orgスコープで引き直し（URL改ざん対策）
   const contacts = await prisma.contact.findMany({
@@ -105,10 +93,10 @@ export default async function ComposePage({
       })
     : null;
 
-  // プレビュー用の subject/body 初期値（テンプレがあれば反映、無ければ空）
-  const subjectDefault = selectedTemplate?.subject ?? "";
-  const textBodyDefault = selectedTemplate?.textBody ?? "";
-  const htmlBodyDefault = selectedTemplate?.htmlBody ?? "";
+  // プレビュー用の subject/body 初期値（再送信 > テンプレ > 空 の優先順）
+  const subjectDefault = fromCampaign?.subjectSnapshot ?? selectedTemplate?.subject ?? "";
+  const textBodyDefault = fromCampaign?.textBodySnapshot ?? selectedTemplate?.textBody ?? "";
+  const htmlBodyDefault = fromCampaign?.htmlBodySnapshot ?? selectedTemplate?.htmlBody ?? "";
 
   // --- Server Action: 送信 ---
   async function sendAction(formData: FormData) {
@@ -133,6 +121,11 @@ export default async function ComposePage({
     if (!textBody.trim()) {
       redirect(`/dashboard/compose?ids=${encodeURIComponent(ids2.join(","))}&templateId=${encodeURIComponent(templateId2 ?? "")}&err=body`);
     }
+
+    // 予約日時（空なら即時送信）
+    const scheduledAtStr = String(formData.get("scheduledAt") ?? "").trim();
+    const scheduledAt = scheduledAtStr ? new Date(scheduledAtStr) : null;
+    const isScheduled = scheduledAt !== null && scheduledAt > new Date();
 
     // orgスコープで再度引き直し（Action側でも必須）
     const contacts2 = await prisma.contact.findMany({
@@ -166,7 +159,8 @@ export default async function ComposePage({
         subjectSnapshot: subject,
         textBodySnapshot: textBody,
         htmlBodySnapshot: htmlBody,
-        status: "SENDING",
+        status: isScheduled ? "SCHEDULED" : "SENDING",
+        scheduledAt: isScheduled ? scheduledAt : null,
         createdByUserId: session2.userId,
       },
       select: { id: true },
@@ -196,89 +190,28 @@ export default async function ComposePage({
       };
     });
 
-    // createMany（SQLiteでもOK）
     await prisma.emailCampaignRecipient.createMany({
       data: recipientsData,
     });
 
-    // 送信対象だけ取得（PENDINGのみ）
-    const pending = await prisma.emailCampaignRecipient.findMany({
-      where: { campaignId: campaign.id, status: "PENDING" },
-      select: {
-        id: true,
-        emailSnapshot: true,
-        contactNameSnapshot: true,
-        contactId: true,
-      },
-    });
-
-    // contactの差し込みデータ用に map
-    const contactMap = new Map(contacts2.map((c) => [c.id, c]));
-
-    let sentCount = 0;
-    let failedCount = 0;
-    const skippedCount = recipientsData.filter((r) => r.status === "SKIPPED").length;
-
-    for (const r of pending) {
-      const email = r.emailSnapshot!;
-      const c = r.contactId ? contactMap.get(r.contactId) : undefined;
-
-      // 差し込み反映
-      const subjRendered = c ? applyVars(subject, c) : subject;
-      const textRendered = c ? applyVars(textBody, c) : textBody;
-      const htmlRendered = htmlBody ? (c ? applyVars(htmlBody, c) : htmlBody) : undefined;
-
-      try {
-        const info = await sendEmail({
-          to: email,
-          subject: subjRendered,
-          text: textRendered,
-          html: htmlRendered,
+    if (!isScheduled) {
+      // 即時送信: バックグラウンドで処理
+      setImmediate(() => {
+        processCampaign(campaign.id).catch((err: unknown) => {
+          console.error("[sendAction] processCampaign error:", err);
+          prisma.emailCampaign
+            .update({ where: { id: campaign.id }, data: { status: "FAILED" } })
+            .catch(() => {});
         });
-
-        await prisma.emailCampaignRecipient.update({
-          where: { id: r.id },
-          data: {
-            status: "SENT",
-            providerMessageId: info.messageId,
-            errorMessage: null,
-          },
-        });
-
-        sentCount++;
-      } catch (e: unknown) {
-        await prisma.emailCampaignRecipient.update({
-          where: { id: r.id },
-          data: {
-            status: "FAILED",
-            errorMessage: toErrorMessage(e),
-          },
-        });
-        failedCount++;
-      }
+      });
     }
+    // 予約送信の場合は scheduler.ts が scheduledAt になったら自動処理
 
-    // Campaign集計更新 & status確定
-    const totalCount = recipientsData.length;
-    const finalStatus = failedCount > 0 ? "FAILED" : "SENT";
-
-    await prisma.emailCampaign.update({
-      where: { id: campaign.id },
-      data: {
-        status: finalStatus,
-        totalCount,
-        sentCount,
-        failedCount,
-        skippedCount,
-      },
-    });
-
-    // リダイレクト先（campaign詳細ページが無いなら、とりあえずcomposeへ結果クエリでもOK）
     redirect(`/dashboard/compose/result?campaignId=${campaign.id}`);
   }
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 1000, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>メール作成</h1>
         <Link href="/dashboard/contacts" className="btn-custom01">
@@ -364,7 +297,6 @@ export default async function ComposePage({
             style={{ width: "100%", padding: 10, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
           />
 
-          {/* HTMLを使いたくなったらON（今は隠してもOK） */}
           <details>
             <summary style={{ cursor: "pointer", color: "#333" }}>HTML本文（任意）</summary>
             <textarea
@@ -374,6 +306,21 @@ export default async function ComposePage({
               style={{ width: "100%", padding: 10, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
             />
           </details>
+
+          {/* 予約送信 */}
+          <div style={{ padding: "12px 14px", border: "1px solid #333", borderRadius: 10 }}>
+            <label style={{ fontSize: 13, fontWeight: 600 }}>
+              予約送信日時
+              <span style={{ fontWeight: 400, color: "#888", marginLeft: 8 }}>
+                （空のまま送信すると即時送信、日時を指定すると予約）
+              </span>
+            </label>
+            <input
+              type="datetime-local"
+              name="scheduledAt"
+              style={{ display: "block", marginTop: 8, padding: "8px 10px", borderRadius: 6, border: "1px solid #555", background: "#111", color: "#fff", fontSize: 14 }}
+            />
+          </div>
 
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 8 }}>
             <button type="submit" className="btn-custom01 btn-custom01-primary">
