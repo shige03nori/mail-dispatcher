@@ -2,7 +2,9 @@ import { SendEmailArgs, SendEmailResult } from "./types";
 import { sendEmailConsole } from "./sender.console";
 // import { sendEmailSMTP } from "./sender.smtp";
 
-const MODE = process.env.EMAIL_MODE ?? "console";
+// デモモード時はメール送信を強制的にコンソール出力にする
+const MODE =
+  process.env.DEMO_MODE === "true" ? "console" : (process.env.EMAIL_MODE ?? "console");
 // "console" | "smtp"
 
 export async function sendEmail(

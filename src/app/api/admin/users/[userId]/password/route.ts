@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
+import { isDemoAccount } from "@/lib/demo";
 
 export async function PATCH(
   req: Request,
@@ -35,6 +36,14 @@ export async function PATCH(
 
   if (!membership) {
     return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+  }
+
+  const targetUser = await prisma.user.findUnique({ where: { id: userId } });
+  if (targetUser && isDemoAccount(targetUser.email)) {
+    return NextResponse.json(
+      { ok: false, error: "デモアカウントのパスワードは変更できません" },
+      { status: 403 }
+    );
   }
 
   const passwordHash = hashPassword(password);

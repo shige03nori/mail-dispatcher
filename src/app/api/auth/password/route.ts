@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { isDemoAccount } from "@/lib/demo";
 
 export async function PATCH(req: Request) {
   const session = await getSession();
@@ -20,6 +21,13 @@ export async function PATCH(req: Request) {
 
   const user = await prisma.user.findUnique({ where: { id: session.userId } });
   if (!user) return NextResponse.json({ ok: false }, { status: 401 });
+
+  if (isDemoAccount(user.email)) {
+    return NextResponse.json(
+      { ok: false, error: "デモアカウントのパスワードは変更できません" },
+      { status: 403 }
+    );
+  }
 
   // 既存パスワードが設定されている場合は現在のパスワードを確認
   if (user.passwordHash) {

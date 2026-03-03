@@ -5,6 +5,16 @@ import { formStyle } from "@/lib/ui/formStyle";
 
 type Mode = "password" | "magic";
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+const DEMO_ACCOUNTS = [
+  { label: "管理者 (ADMIN)", email: "admin@demo.example" },
+  { label: "編集者 (EDITOR)", email: "editor@demo.example" },
+  { label: "閲覧者 (VIEWER)", email: "viewer@demo.example" },
+] as const;
+
+const DEMO_PASSWORD = "demo1234";
+
 export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("password");
 
@@ -18,6 +28,26 @@ export default function LoginPage() {
   const [magicEmail, setMagicEmail] = useState("shige03nori@gmail.com");
   const [sent, setSent] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
+
+  async function loginAsDemo(demoEmail: string) {
+    setPwLoading(true);
+    setPwError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: demoEmail, password: DEMO_PASSWORD }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.ok) {
+        window.location.href = "/dashboard";
+      } else {
+        setPwError(data.error ?? "デモログインに失敗しました");
+      }
+    } finally {
+      setPwLoading(false);
+    }
+  }
 
   async function submitPassword(e: React.FormEvent) {
     e.preventDefault();
@@ -69,6 +99,41 @@ export default function LoginPage() {
     <main style={{ background: "#000", minHeight: "100vh" }}>
       <div style={containerStyle}>
         <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>ログイン</h1>
+
+        {/* デモアカウントパネル */}
+        {DEMO_MODE && (
+          <div
+            style={{
+              marginTop: 16,
+              marginBottom: 8,
+              padding: 16,
+              background: "#0f172a",
+              border: "1px solid #334155",
+              borderRadius: 8,
+            }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", margin: "0 0 4px" }}>
+              デモアカウント
+            </p>
+            <p style={{ fontSize: 12, color: "#94a3b8", margin: "0 0 12px" }}>
+              以下のボタンでワンクリックログインできます（パスワード: {DEMO_PASSWORD}）
+            </p>
+            <div style={{ display: "grid", gap: 8 }}>
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  disabled={pwLoading}
+                  onClick={() => loginAsDemo(account.email)}
+                  className="btn-custom01 btn-custom01-navy"
+                  style={{ width: "100%", fontSize: 13 }}
+                >
+                  <span className="btn-custom01-front">{account.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* モード切り替えタブ */}
         <div style={{ display: "flex", gap: 8, marginBottom: 24, marginTop: 16 }}>

@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { CampaignStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { processCampaign } from "@/lib/email/processCampaign";
 import { tableStyle } from "@/lib/ui/tableStyle";
+import { formStyle } from "@/lib/ui/formStyle";
 
 function parseIdsParam(idsParam?: string): string[] {
   if (!idsParam) return [];
@@ -159,7 +161,7 @@ export default async function ComposePage({
         subjectSnapshot: subject,
         textBodySnapshot: textBody,
         htmlBodySnapshot: htmlBody,
-        status: isScheduled ? "SCHEDULED" : "SENDING",
+        status: isScheduled ? CampaignStatus.SCHEDULED : CampaignStatus.SENDING,
         scheduledAt: isScheduled ? scheduledAt : null,
         createdByUserId: session2.userId,
       },
@@ -222,7 +224,7 @@ export default async function ComposePage({
       <div style={{ marginTop: 16, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
         <div style={{ fontSize: 14 }}>
           選択: <b>{ids.length}</b>件 / 取得: <b>{contacts.length}</b>件
-          <span style={{ marginLeft: 8, color: "#666" }}>
+          <span style={{ marginLeft: 8, color: "#94a3b8" }}>
             （送信可能: {withEmail.length} / メールなし: {noEmail.length}）
           </span>
         </div>
@@ -239,7 +241,7 @@ export default async function ComposePage({
 
         {templates.length === 0 ? (
           <div style={{ marginTop: 10 }}>
-            <div style={{ color: "#666" }}>
+            <div style={{ color: "#94a3b8" }}>
               テンプレがまだありません（先に作成してください）
             </div>
             <div style={{ marginTop: 10 }}>
@@ -250,11 +252,11 @@ export default async function ComposePage({
           </div>
         ) : (
           <form action="/dashboard/compose" method="GET" style={{ marginTop: 10 }}>
-            <label style={{ display: "block", fontSize: 13, color: "#333" }}>テンプレ選択</label>
+            <label style={{ display: "block", fontSize: 13 }}>テンプレ選択</label>
             <select
               name="templateId"
               defaultValue={templateId}
-              style={{ width: "100%", padding: 10, marginTop: 6 }}
+              style={{ ...formStyle.select, width: "100%", marginTop: 6 }}
             >
               <option value="">選択してください</option>
               {templates.map((t) => (
@@ -282,11 +284,11 @@ export default async function ComposePage({
           <input type="hidden" name="templateId" value={templateId} />
 
           <label style={{ fontSize: 13 }}>件名</label>
-          <input name="subject" defaultValue={subjectDefault} style={{ width: "100%", padding: 10 }} />
+          <input name="subject" defaultValue={subjectDefault} style={formStyle.input} />
 
           <label style={{ fontSize: 13 }}>
             本文（text）{" "}
-            <span style={{ color: "#666" }}>
+            <span style={{ color: "#94a3b8" }}>
               ※差し込み例: {"{{name}}"} / {"{{companyName}}"}
             </span>
           </label>
@@ -294,16 +296,16 @@ export default async function ComposePage({
             name="textBody"
             defaultValue={textBodyDefault}
             rows={10}
-            style={{ width: "100%", padding: 10, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+            style={{ ...formStyle.textarea, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
           />
 
           <details>
-            <summary style={{ cursor: "pointer", color: "#333" }}>HTML本文（任意）</summary>
+            <summary style={{ cursor: "pointer" }}>HTML本文（任意）</summary>
             <textarea
               name="htmlBody"
               defaultValue={htmlBodyDefault}
               rows={10}
-              style={{ width: "100%", padding: 10, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+              style={{ ...formStyle.textarea, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
             />
           </details>
 
@@ -311,7 +313,7 @@ export default async function ComposePage({
           <div style={{ padding: "12px 14px", border: "1px solid #333", borderRadius: 10 }}>
             <label style={{ fontSize: 13, fontWeight: 600 }}>
               予約送信日時
-              <span style={{ fontWeight: 400, color: "#888", marginLeft: 8 }}>
+              <span style={{ fontWeight: 400, color: "#94a3b8", marginLeft: 8 }}>
                 （空のまま送信すると即時送信、日時を指定すると予約）
               </span>
             </label>
@@ -326,7 +328,7 @@ export default async function ComposePage({
             <button type="submit" className="btn-custom01 btn-custom01-primary">
               送信する（{withEmail.length}件）
             </button>
-            <span style={{ fontSize: 12, color: "#666" }}>
+            <span style={{ fontSize: 12, color: "#94a3b8" }}>
               メール未設定の{noEmail.length}件は自動でスキップしてログに残ります
             </span>
           </div>
@@ -360,11 +362,11 @@ export default async function ComposePage({
                     <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>{c.phone ?? ""}</td>
                     <td style={{ padding: 10, borderBottom: "1px solid #f2f2f2" }}>
                       {ok ? (
-                        <span style={{ padding: "2px 8px", borderRadius: 999, background: "#e7f7ee", fontSize: 12 }}>
+                        <span style={{ padding: "2px 8px", borderRadius: 999, background: "#e7f7ee", color: "#065f46", fontSize: 12 }}>
                           送信対象
                         </span>
                       ) : (
-                        <span style={{ padding: "2px 8px", borderRadius: 999, background: "#fff3cd", fontSize: 12 }}>
+                        <span style={{ padding: "2px 8px", borderRadius: 999, background: "#fff3cd", color: "#92400e", fontSize: 12 }}>
                           スキップ（メールなし）
                         </span>
                       )}
@@ -374,7 +376,7 @@ export default async function ComposePage({
               })}
               {contacts.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ padding: 12, color: "#666" }}>
+                  <td colSpan={5} style={{ padding: 12, color: "#94a3b8" }}>
                     宛先がありません
                   </td>
                 </tr>

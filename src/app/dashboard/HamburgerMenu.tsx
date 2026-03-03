@@ -9,14 +9,33 @@ interface Props {
   role: Role;
 }
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
 export function HamburgerMenu({ role }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const canEdit = role !== "VIEWER";
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
+  }
+
+  async function handleDemoReset() {
+    if (!confirm("デモデータをリセットします。連絡先・テンプレート・キャンペーンが初期状態に戻ります。よろしいですか？")) return;
+    setResetLoading(true);
+    try {
+      const res = await fetch("/api/demo/reset", { method: "POST" });
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = "/dashboard";
+      } else {
+        alert("リセットに失敗しました: " + (data.error ?? "不明なエラー"));
+      }
+    } finally {
+      setResetLoading(false);
+    }
   }
 
   const close = () => setIsOpen(false);
@@ -166,6 +185,25 @@ export function HamburgerMenu({ role }: Props) {
           <NavLink href="/dashboard/campaigns" onClick={close}>
             📊 配信履歴
           </NavLink>
+
+          {DEMO_MODE && (
+            <>
+              <div style={{ margin: "8px 0", borderTop: "1px solid #1e293b" }} />
+              <div style={{ padding: "8px 16px" }}>
+                <button
+                  type="button"
+                  disabled={resetLoading}
+                  onClick={handleDemoReset}
+                  className="btn-custom01 btn-custom01-secondary"
+                  style={{ width: "100%", fontSize: 13 }}
+                >
+                  <span className="btn-custom01-front">
+                    {resetLoading ? "リセット中..." : "デモデータをリセット"}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* ロール表示 */}

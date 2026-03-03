@@ -1,3 +1,4 @@
+import { CampaignStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { processCampaign } from "@/lib/email/processCampaign";
 
@@ -31,7 +32,7 @@ async function runScheduledCampaigns() {
 
   const campaigns = await prisma.emailCampaign.findMany({
     where: {
-      status: "SCHEDULED",
+      status: CampaignStatus.SCHEDULED,
       scheduledAt: { lte: now },
     },
     select: { id: true, subjectSnapshot: true },
@@ -44,8 +45,8 @@ async function runScheduledCampaigns() {
   for (const c of campaigns) {
     // SCHEDULED → SENDING に変更（重複処理防止）
     const { count } = await prisma.emailCampaign.updateMany({
-      where: { id: c.id, status: "SCHEDULED" },
-      data: { status: "SENDING" },
+      where: { id: c.id, status: CampaignStatus.SCHEDULED },
+      data: { status: CampaignStatus.SENDING },
     });
 
     if (count === 0) {
@@ -58,7 +59,7 @@ async function runScheduledCampaigns() {
     processCampaign(c.id).catch((err) => {
       console.error(`[scheduler] キャンペーン ${c.id} 送信エラー:`, err);
       prisma.emailCampaign
-        .update({ where: { id: c.id }, data: { status: "FAILED" } })
+        .update({ where: { id: c.id }, data: { status: CampaignStatus.FAILED } })
         .catch(() => {});
     });
   }

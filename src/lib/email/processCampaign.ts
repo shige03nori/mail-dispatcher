@@ -1,3 +1,4 @@
+import { CampaignStatus, RecipientStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
@@ -39,7 +40,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
 
   // PENDING 宛先を取得
   const pending = await prisma.emailCampaignRecipient.findMany({
-    where: { campaignId, status: "PENDING" },
+    where: { campaignId, status: RecipientStatus.PENDING },
     select: {
       id: true,
       emailSnapshot: true,
@@ -62,7 +63,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
     select: { status: true },
   });
   const totalCount = allRecipients.length;
-  const skippedCount = allRecipients.filter((r) => r.status === "SKIPPED").length;
+  const skippedCount = allRecipients.filter((r) => r.status === RecipientStatus.SKIPPED).length;
 
   let sentCount = 0;
   let failedCount = 0;
@@ -90,7 +91,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
       await prisma.emailCampaignRecipient.update({
         where: { id: r.id },
         data: {
-          status: "SENT",
+          status: RecipientStatus.SENT,
           providerMessageId: info.messageId,
           errorMessage: null,
         },
@@ -101,7 +102,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
       await prisma.emailCampaignRecipient.update({
         where: { id: r.id },
         data: {
-          status: "FAILED",
+          status: RecipientStatus.FAILED,
           errorMessage: toErrorMessage(e),
         },
       });
@@ -109,7 +110,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
     }
   }
 
-  const finalStatus = failedCount > 0 ? "FAILED" : "SENT";
+  const finalStatus = failedCount > 0 ? CampaignStatus.FAILED : CampaignStatus.SENT;
 
   await prisma.emailCampaign.update({
     where: { id: campaignId },
