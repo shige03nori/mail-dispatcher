@@ -27,6 +27,18 @@ export default async function DashboardPage() {
       >
       <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
 
+        {/* ロゴ */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.97)",
+            borderRadius: 10,
+            padding: "6px 10px",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="VICENT" style={{ height: 26, display: "block" }} />
+        </div>
       </div>
 
       {/* 組織・ユーザー情報 */}

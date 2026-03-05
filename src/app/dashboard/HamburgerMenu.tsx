@@ -49,7 +49,7 @@ export function HamburgerMenu({ role }: Props) {
         style={{
           position: "fixed",
           top: 16,
-          left: "max(16px, calc((100vw - 1000px) / 2 + 16px))",
+          left: "max(16px, calc((100vw - 1100px) / 2 + 16px))",
           zIndex: 50,
           width: 40,
           height: 40,
@@ -110,13 +110,22 @@ export function HamburgerMenu({ role }: Props) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "16px 16px 14px",
+            padding: "14px 16px 12px",
             borderBottom: "1px solid #1e293b",
           }}
         >
-          <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: "0.02em" }}>
-            Mail Dispatcher
-          </span>
+          {/* ロゴ - 白カード背景で黒文字を見やすく */}
+          <div
+            style={{
+              background: "rgba(255,255,255,0.97)",
+              borderRadius: 10,
+              padding: "6px 10px",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="VICENT" style={{ height: 38, display: "block" }} />
+          </div>
           <button
             onClick={close}
             aria-label="閉じる"
