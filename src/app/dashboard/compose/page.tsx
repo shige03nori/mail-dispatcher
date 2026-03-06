@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth/session";
 import { processCampaign } from "@/lib/email/processCampaign";
 import { tableStyle } from "@/lib/ui/tableStyle";
 import { formStyle } from "@/lib/ui/formStyle";
+import { AttachmentPicker } from "./AttachmentPicker";
 
 function parseIdsParam(idsParam?: string): string[] {
   if (!idsParam) return [];
@@ -324,19 +325,7 @@ export default async function ComposePage({
             />
           </details>
 
-          {/* 添付ファイル */}
-          <div style={{ padding: "12px 14px", border: "1px solid #fff", borderRadius: 10 }}>
-            <label style={{ fontSize: 13, fontWeight: 600 }}>
-              添付ファイル
-              <span style={{ fontWeight: 400, color: "#94a3b8", marginLeft: 8 }}>（複数選択可）</span>
-            </label>
-            <input
-              type="file"
-              name="attachments"
-              multiple
-              style={{ display: "block", marginTop: 8, fontSize: 14, color: "#fff" }}
-            />
-          </div>
+          <AttachmentPicker />
 
           {/* 予約送信 */}
           <div style={{ padding: "12px 14px", border: "1px solid #fff", borderRadius: 10 }}>
