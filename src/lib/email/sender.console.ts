@@ -8,6 +8,9 @@ export async function sendEmailConsole(
   console.log("subject:", args.subject);
   console.log("text:", args.text);
   if (args.html) console.log("html:", args.html);
+  if (args.attachments?.length) {
+    console.log("attachments:", args.attachments.map((a) => `${a.filename}(${a.content.length}bytes)`).join(", "));
+  }
   console.log("=======================");
 
   return {

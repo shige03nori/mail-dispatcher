@@ -20,6 +20,7 @@ export async function sendEmailSMTP(
     subject: args.subject,
     text: args.text,
     html: args.html,
+    attachments: args.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
   });
 
   return {
