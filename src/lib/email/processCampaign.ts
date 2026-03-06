@@ -1,6 +1,9 @@
+import path from "path";
+import fs from "fs/promises";
 import { CampaignStatus, RecipientStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { Attachment } from "@/lib/email/types";
 
 function applyVars(
   template: string,
@@ -37,6 +40,19 @@ export async function processCampaign(campaignId: string): Promise<void> {
     },
   });
   if (!campaign) return;
+
+  // 添付ファイルを読み込む
+  const uploadsDir = path.join(process.cwd(), "uploads", "campaigns", campaignId);
+  const attachments: Attachment[] = [];
+  try {
+    const files = await fs.readdir(uploadsDir);
+    for (const filename of files) {
+      const content = await fs.readFile(path.join(uploadsDir, filename));
+      attachments.push({ filename, content });
+    }
+  } catch {
+    // ディレクトリなし = 添付なし（正常）
+  }
 
   // PENDING 宛先を取得
   const pending = await prisma.emailCampaignRecipient.findMany({
@@ -86,6 +102,7 @@ export async function processCampaign(campaignId: string): Promise<void> {
         subject: subjRendered,
         text: textRendered,
         html: htmlRendered,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       await prisma.emailCampaignRecipient.update({

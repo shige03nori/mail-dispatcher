@@ -1,3 +1,5 @@
+import path from "path";
+import fs from "fs/promises";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CampaignStatus } from "@prisma/client";
@@ -6,6 +8,7 @@ import { getSession } from "@/lib/auth/session";
 import { processCampaign } from "@/lib/email/processCampaign";
 import { tableStyle } from "@/lib/ui/tableStyle";
 import { formStyle } from "@/lib/ui/formStyle";
+import { AttachmentPicker } from "./AttachmentPicker";
 
 function parseIdsParam(idsParam?: string): string[] {
   if (!idsParam) return [];
@@ -196,6 +199,19 @@ export default async function ComposePage({
       data: recipientsData,
     });
 
+    // 添付ファイルをディスクに保存（即時・予約の両方で共通）
+    const attachmentFiles = formData.getAll("attachments") as File[];
+    const validFiles = attachmentFiles.filter((f) => f.size > 0);
+    if (validFiles.length > 0) {
+      const uploadsDir = path.join(process.cwd(), "uploads", "campaigns", campaign.id);
+      await fs.mkdir(uploadsDir, { recursive: true });
+      for (const file of validFiles) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const safeName = path.basename(file.name).replace(/[^a-zA-Z0-9._\-]/g, "_");
+        await fs.writeFile(path.join(uploadsDir, safeName), buffer);
+      }
+    }
+
     if (!isScheduled) {
       // 即時送信: バックグラウンドで処理
       setImmediate(() => {
@@ -309,8 +325,10 @@ export default async function ComposePage({
             />
           </details>
 
+          <AttachmentPicker />
+
           {/* 予約送信 */}
-          <div style={{ padding: "12px 14px", border: "1px solid #333", borderRadius: 10 }}>
+          <div style={{ padding: "12px 14px", border: "1px solid #fff", borderRadius: 10 }}>
             <label style={{ fontSize: 13, fontWeight: 600 }}>
               予約送信日時
               <span style={{ fontWeight: 400, color: "#94a3b8", marginLeft: 8 }}>
@@ -320,7 +338,7 @@ export default async function ComposePage({
             <input
               type="datetime-local"
               name="scheduledAt"
-              style={{ display: "block", marginTop: 8, padding: "8px 10px", borderRadius: 6, border: "1px solid #555", background: "#111", color: "#fff", fontSize: 14 }}
+              style={{ display: "block", marginTop: 8, padding: "8px 10px", borderRadius: 6, border: "1px solid #fff", background: "#111", color: "#fff", fontSize: 14 }}
             />
           </div>
 
