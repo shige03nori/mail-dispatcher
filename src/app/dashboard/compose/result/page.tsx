@@ -56,7 +56,7 @@ export default async function ComposeResultPage({
   const isScheduled = campaign.status === "SCHEDULED";
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 1000, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       {/* 送信中は3秒ごと、予約中は60秒ごとに自動リロード */}
       {isSending && <meta httpEquiv="refresh" content="3" />}
       {isScheduled && <meta httpEquiv="refresh" content="60" />}

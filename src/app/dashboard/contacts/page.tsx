@@ -40,7 +40,7 @@ export default async function ContactsPage({
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return (
-    <main style={{ maxWidth: 1100, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
+    <main style={{ maxWidth: 1100, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>連絡先</h1>
         {canEdit && (

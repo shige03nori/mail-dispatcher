@@ -22,7 +22,7 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
   const canEdit = session.role !== "VIEWER";
 
   return (
-    <main style={{ maxWidth: 800, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
+    <main style={{ maxWidth: 800, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       <h1 style={{ fontSize: 28, fontWeight: 800 }}>連絡先 詳細{canEdit ? "/編集" : ""}</h1>
       <div style={{ marginTop: 16 }}>
         <ContactForm
