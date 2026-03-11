@@ -63,7 +63,7 @@ export default async function CampaignDetailPage({
     .filter((id, i, arr) => arr.indexOf(id) === i); // 重複除去
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 1000, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>キャンペーン詳細</h1>
 
@@ -148,7 +148,7 @@ export default async function CampaignDetailPage({
       <section style={{ marginTop: 16 }}>
         <h2 style={{ fontSize: 16, fontWeight: 800 }}>送信明細</h2>
 
-        <div style={{ marginTop: 10, border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
+        <div className="table-scroll-wrap" style={{ marginTop: 10, border: "1px solid #ddd", borderRadius: 10 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
             <thead style={{ background: "#fff" }}>
               <tr>

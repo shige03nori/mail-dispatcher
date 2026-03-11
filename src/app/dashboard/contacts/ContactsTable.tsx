@@ -249,7 +249,7 @@ export default function ContactsTable({
 
       {msg && <div style={{ marginTop: 10, padding: 10, border: "1px solid #333" }}>{msg}</div>}
 
-      <div style={{ marginTop: 16, border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
+      <div className="table-scroll-wrap" style={{ marginTop: 16, border: "1px solid #ddd", borderRadius: 10 }}>
         <table style={tableStyle.table}>
           <thead style={tableStyle.thead}>
             <tr>

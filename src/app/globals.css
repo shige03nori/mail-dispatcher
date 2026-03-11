@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./styles/button.css";
+@import "./styles/responsive.css";
 
 :root {
   --background: #ffffff;

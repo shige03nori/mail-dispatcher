@@ -17,7 +17,7 @@ export default async function UsersPage() {
   });
 
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 900, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 style={{ fontSize: 24, fontWeight: 800 }}>ユーザー管理</h1>
         <Link href="/dashboard" className="btn-custom01">
@@ -29,7 +29,7 @@ export default async function UsersPage() {
         メンバー一覧。パスワードを設定するとパスワードログインが有効になります。
       </p>
 
-      <div style={{ marginTop: 20, border: "1px solid #e5e7eb", borderRadius: 10, overflow: "hidden" }}>
+      <div className="table-scroll-wrap" style={{ marginTop: 20, border: "1px solid #e5e7eb", borderRadius: 10 }}>
         <table style={{ ...tableStyle.table, color: "#fff" }}>
           <thead style={{ background: "#fff" }}>
             <tr>

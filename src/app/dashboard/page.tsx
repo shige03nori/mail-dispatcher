@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   const canEdit = session.role !== "VIEWER";
 
   return (
-    <main style={{ maxWidth: 800, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 800, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       {/* ヘッダー */}
       <div
         style={{

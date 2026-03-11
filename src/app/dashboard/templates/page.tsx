@@ -45,7 +45,7 @@ export default async function TemplatesPage({
   const canEdit = session.role !== "VIEWER";
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 1000, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>テンプレート</h1>
         <div style={{ display: "flex", gap: 10 }}>
@@ -90,7 +90,7 @@ export default async function TemplatesPage({
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <div style={{ border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
+        <div className="table-scroll-wrap" style={{ border: "1px solid #ddd", borderRadius: 10 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
             <thead style={{ background: "#fff" }}>
               <tr>

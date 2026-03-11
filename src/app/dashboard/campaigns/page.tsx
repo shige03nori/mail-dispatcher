@@ -286,7 +286,7 @@ export default async function CampaignsPage({
   const clearHref = "/dashboard/campaigns";
 
   return (
-    <main style={{ maxWidth: 1150, margin: "40px auto", padding: 16 }}>
+    <main style={{ maxWidth: 1150, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>キャンペーン履歴</h1>
       </div>
@@ -294,7 +294,7 @@ export default async function CampaignsPage({
       {/* フィルタ */}
       <section style={{ marginTop: 16, padding: 12, border: "1px solid #fff", borderRadius: 10 }}>
         <form action="/dashboard/campaigns" method="GET" style={{ display: "grid", gap: 10 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 240px 240px", gap: 10, alignItems: "end" }}>
+          <div className="filter-grid-3">
             <div>
               <label style={{ display: "block", fontSize: 12, color: "#fff", marginBottom: 4 }}>検索（件名 / テンプレ名）</label>
               <input
@@ -327,7 +327,7 @@ export default async function CampaignsPage({
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "200px 200px 160px 1fr", gap: 10, alignItems: "end" }}>
+          <div className="filter-grid-4">
             <div>
               <label style={{ display: "block", fontSize: 12, color: "#fff", marginBottom: 4 }}>from</label>
               <input type="date" name="from" defaultValue={sp.from ?? ""} style={{ ...formStyle.input }} />
@@ -393,7 +393,7 @@ export default async function CampaignsPage({
       )}
 
       {/* 一覧 */}
-      <div style={{ marginTop: 16, border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
+      <div className="table-scroll-wrap" style={{ marginTop: 16, border: "1px solid #ddd", borderRadius: 10 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
           <thead style={{ background: "#fff" }}>
             <tr>

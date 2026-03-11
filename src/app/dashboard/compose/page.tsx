@@ -356,7 +356,7 @@ export default async function ComposePage({
       {/* 宛先プレビュー */}
       <section style={{ marginTop: 16 }}>
         <h2 style={{ fontSize: 16, fontWeight: 800 }}>宛先</h2>
-        <div style={{ marginTop: 10, border: "1px solid #ddd", borderRadius: 10, overflow: "hidden" }}>
+        <div className="table-scroll-wrap" style={{ marginTop: 10, border: "1px solid #ddd", borderRadius: 10 }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead style={{ background: "#fafafa" }}>
               <tr>
