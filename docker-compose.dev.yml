@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: maildispatcher
+      POSTGRES_PASSWORD: localpass
+      POSTGRES_DB: maildispatcher
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
