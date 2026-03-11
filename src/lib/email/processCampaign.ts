@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { Attachment } from "@/lib/email/types";
 
-function applyVars(
+export function applyVars(
   template: string,
   c: { name: string; companyName: string | null; email: string | null; phone: string | null }
 ) {
@@ -16,7 +16,7 @@ function applyVars(
     .replaceAll("{{phone}}", c.phone ?? "");
 }
 
-function toErrorMessage(e: unknown): string {
+export function toErrorMessage(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === "string") return e;
   try {
