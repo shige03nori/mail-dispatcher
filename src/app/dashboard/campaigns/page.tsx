@@ -286,7 +286,7 @@ export default async function CampaignsPage({
   const clearHref = "/dashboard/campaigns";
 
   return (
-    <main style={{ maxWidth: 1150, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
+    <main style={{ maxWidth: 1150, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>キャンペーン履歴</h1>
       </div>

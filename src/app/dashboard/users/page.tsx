@@ -17,7 +17,7 @@ export default async function UsersPage() {
   });
 
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
+    <main style={{ maxWidth: 900, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 style={{ fontSize: 24, fontWeight: 800 }}>ユーザー管理</h1>
         <Link href="/dashboard" className="btn-custom01">

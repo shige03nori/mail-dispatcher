@@ -63,7 +63,7 @@ export default async function CampaignDetailPage({
     .filter((id, i, arr) => arr.indexOf(id) === i); // 重複除去
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: "16px 16px 16px 64px" }}>
+    <main style={{ maxWidth: 1000, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800 }}>キャンペーン詳細</h1>
 

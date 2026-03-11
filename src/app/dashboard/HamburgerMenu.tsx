@@ -42,36 +42,49 @@ export function HamburgerMenu({ role }: Props) {
 
   return (
     <>
-      {/* ハンバーガーボタン */}
-      <button
-        onClick={() => setIsOpen(true)}
-        aria-label="メニューを開く"
+      {/* トップバー */}
+      <div
         style={{
           position: "fixed",
-          top: 16,
-          left: "max(16px, calc((100vw - 1100px) / 2 + 16px))",
-          zIndex: 50,
-          width: 40,
-          height: 40,
-          borderRadius: 8,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 56,
           background: "#0f172a",
-          border: "2px solid #334155",
-          cursor: "pointer",
+          borderBottom: "1px solid #1e293b",
+          zIndex: 49,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 5,
-          padding: 0,
-          transition: "background 0.15s",
+          padding: "0 16px",
         }}
-        onMouseOver={(e) => (e.currentTarget.style.background = "#1e293b")}
-        onMouseOut={(e) => (e.currentTarget.style.background = "#0f172a")}
       >
-        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
-        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
-        <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
-      </button>
+        {/* ハンバーガーボタン */}
+        <button
+          onClick={() => setIsOpen(true)}
+          aria-label="メニューを開く"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            background: "transparent",
+            border: "2px solid #334155",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 5,
+            padding: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.background = "#1e293b")}
+          onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+        >
+          <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
+          <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
+          <span style={{ display: "block", width: 20, height: 2, background: "#fff", borderRadius: 1 }} />
+        </button>
+      </div>
 
       {/* オーバーレイ */}
       <div
