@@ -1,6 +1,6 @@
 import { SendEmailArgs, SendEmailResult } from "./types";
 import { sendEmailConsole } from "./sender.console";
-// import { sendEmailSMTP } from "./sender.smtp";
+import { sendEmailSMTP } from "./sender.smtp";
 
 // デモモード時はメール送信を強制的にコンソール出力にする
 const MODE =
@@ -11,7 +11,7 @@ export async function sendEmail(
   args: SendEmailArgs
 ): Promise<SendEmailResult> {
   if (MODE === "smtp") {
-    // return sendEmailSMTP(args);
+    return sendEmailSMTP(args);
   }
   return sendEmailConsole(args);
 }
