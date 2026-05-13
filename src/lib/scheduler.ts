@@ -21,7 +21,7 @@ export function startScheduler() {
   // TODO: 起動直後に1回実行し、その後は1分ごとに繰り返す
   // ヒント: runScheduledCampaigns().catch(...) で起動直後チェック
   // ヒント: setInterval(() => runScheduledCampaigns().catch(...), 60 * 1000) で定期実行
-  throw new Error("TODO: startScheduler を実装してください");
+  console.log("[scheduler] TODO: スケジューラーが未実装のためスキップします");
 }
 
 // TODO: scheduledAt が現在時刻以前の SCHEDULED キャンペーンを取得して送信する関数を実装する
@@ -35,5 +35,6 @@ export function startScheduler() {
 // ヒント: prisma.emailCampaign.findMany({ where: { status: SCHEDULED, scheduledAt: { lte: now } } })
 // ヒント: processCampaign() は非同期で実行し、失敗時は status を FAILED に更新する
 async function runScheduledCampaigns() {
-  throw new Error("TODO: runScheduledCampaigns を実装してください");
+  // TODO: scheduledAt が現在時刻以前の SCHEDULED キャンペーンを取得して送信する
+  // （startScheduler を実装すると自動的に呼ばれるようになります）
 }
