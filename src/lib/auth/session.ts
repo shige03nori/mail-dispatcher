@@ -11,51 +11,61 @@ type SessionPayload = {
   exp: number; // epoch ms
 };
 
-// TODO: SESSION_SECRET 環境変数を取得して検証する関数を実装する
-// ヒント: process.env.SESSION_SECRET を読み、32文字未満なら Error をスロー
 function requireSecret(): string {
-  throw new Error("TODO: requireSecret を実装してください");
+  const s = process.env.SESSION_SECRET;
+  if (!s || s.trim().length < 32) {
+    throw new Error("SESSION_SECRET is missing or too short (min 32 chars).");
+  }
+  return s;
 }
 
-// TODO: ペイロードを HMAC-SHA256 で署名して base64url 文字列を返す関数を実装する
-// ヒント: crypto.createHmac("sha256", requireSecret()).update(data).digest("base64url")
 function sign(data: string): string {
-  throw new Error("TODO: sign を実装してください");
+  return crypto.createHmac("sha256", requireSecret()).update(data).digest("base64url");
 }
 
-// TODO: SessionPayload を「base64url(JSON).署名」形式の文字列にエンコードする関数を実装する
-// ヒント: JSON.stringify → Buffer.toString("base64url") でデータ部分を作り、sign() と "." で連結
 function encode(payload: SessionPayload): string {
-  throw new Error("TODO: encode を実装してください");
+  const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = sign(data);
+  return `${data}.${sig}`;
 }
 
-// TODO: エンコードされた文字列を検証してデコードする関数を実装する
-// ヒント: "data.sig" の形式に分割し、sign(data) === sig を確認してから JSON.parse
-// ヒント: payload.exp を Date.now() と比較して期限切れなら null を返す
 function decode(value: string): SessionPayload | null {
-  throw new Error("TODO: decode を実装してください");
+  const [data, sig] = value.split(".");
+  if (!data || !sig) return null;
+  if (sign(data) !== sig) return null;
+  try {
+    const json = Buffer.from(data, "base64url").toString("utf-8");
+    const payload = JSON.parse(json) as SessionPayload;
+    if (typeof payload.exp !== "number" || Date.now() > payload.exp) return null;
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
-// TODO: NextResponse の Cookie にセッションを書き込む関数を実装する
-// ヒント: encode() でトークンを作り、res.cookies.set(COOKIE_NAME, value, { httpOnly: true, ... })
-// ヒント: secure は本番環境(NODE_ENV === "production")のみ true にする
 export function setSessionCookie(
   res: NextResponse,
   payload: Omit<SessionPayload, "exp">,
   maxAgeSeconds = 60 * 60 * 12
 ) {
-  throw new Error("TODO: setSessionCookie を実装してください");
+  const exp = Date.now() + maxAgeSeconds * 1000;
+  const value = encode({ ...payload, exp });
+  res.cookies.set(COOKIE_NAME, value, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: maxAgeSeconds,
+  });
 }
 
-// TODO: Cookie のセッションを削除する関数を実装する
-// ヒント: res.cookies.set(COOKIE_NAME, "", { path: "/", maxAge: 0 })
 export function clearSessionCookie(res: NextResponse) {
-  throw new Error("TODO: clearSessionCookie を実装してください");
+  res.cookies.set(COOKIE_NAME, "", { path: "/", maxAge: 0 });
 }
 
-// TODO: Cookie からセッションを取得して返す async 関数を実装する
-// ヒント: const store = await cookies(); でCookieストアを取得
-// ヒント: store.get(COOKIE_NAME)?.value を decode() に渡して返す
 export async function getSession(): Promise<SessionPayload | null> {
-  throw new Error("TODO: getSession を実装してください");
+  const store = await cookies();
+  const value = store.get(COOKIE_NAME)?.value;
+  if (!value) return null;
+  return decode(value);
 }
