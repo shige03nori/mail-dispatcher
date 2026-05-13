@@ -4,63 +4,39 @@ import { useState } from "react";
 import { formStyle } from "@/lib/ui/formStyle";
 import { invitationSchema } from "@/lib/schemas/invitation";
 
+// TODO: ユーザー招待フォームコンポーネントを実装する
+//
+// 仕様:
+// - メールアドレス入力欄と権限選択（VIEWER / EDITOR）を持つフォーム
+// - 送信前に invitationSchema（Zod）でクライアントサイドバリデーションを行う
+//   → メール形式エラーがあれば入力欄の下にエラーメッセージを表示する
+// - POST /api/invitations/create へ { email, role } を送信する
+// - 成功したら「ターミナルを確認してください」と表示してメール欄をリセット
+//
+// ヒント:
+// - invitationSchema.safeParse({ email, role }) でバリデーション
+// - parsed.error.issues.find(i => i.path[0] === "email") でメールエラーを取り出す
+// - ADMIN は招待できず VIEWER / EDITOR のみ招待可能（ロールの選択肢を限定）
+
 export default function InviteForm() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"VIEWER" | "EDITOR">("VIEWER");
-  const [status, setStatus] = useState<string>("");
-  const [emailError, setEmailError] = useState<string>("");
+  const [status, setStatus] = useState("");
+  const [emailError, setEmailError] = useState("");
 
-  async function submit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    setEmailError("");
-
-    const parsed = invitationSchema.safeParse({ email, role });
-    if (!parsed.success) {
-      const emailIssue = parsed.error.issues.find((i) => i.path[0] === "email");
-      if (emailIssue) setEmailError(emailIssue.message);
-      return;
-    }
-
-    setStatus("送信中...");
-
-    const res = await fetch("/api/invitations/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, role }),
-    });
-
-    if (res.ok) {
-      setStatus("招待リンクを発行しました。ターミナル（コンソール）を確認してください。");
-      setEmail("");
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setStatus(`失敗: ${data?.error ?? "unknown"}`);
-    }
-  }
-
+  // TODO: フォームのsubmit処理を実装する
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
-      <label style={{ fontWeight: 600 }}>招待するメールアドレス</label>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        type="email"
-        placeholder="user@example.com"
-        style={{ ...formStyle.input, ...(emailError ? { borderColor: "#f87171" } : {}) }}
-      />
-      {emailError && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{emailError}</div>}
-
-      <label style={{ fontWeight: 600 }}>権限</label>
-      <select value={role} onChange={(e) => setRole(e.target.value as "VIEWER" | "EDITOR")} style={formStyle.select}>
+    <form onSubmit={(e) => { e.preventDefault(); alert("TODO: InviteForm を実装してください"); }} style={{ display: "grid", gap: 10 }}>
+      <label>招待するメールアドレス</label>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="user@example.com" />
+      {emailError && <div style={{ color: "red" }}>{emailError}</div>}
+      <label>権限</label>
+      <select value={role} onChange={(e) => setRole(e.target.value as "VIEWER" | "EDITOR")}>
         <option value="VIEWER">VIEWER（閲覧のみ）</option>
         <option value="EDITOR">EDITOR（編集可）</option>
       </select>
-
-      <button type="submit" className="btn-custom01 btn-custom01-primary">
-        招待リンクを発行
-      </button>
-
-      {status && <div style={{ padding: 10, border: "1px solid #eee" }}>{status}</div>}
+      <button type="submit">招待リンクを発行</button>
+      {status && <div>{status}</div>}
     </form>
   );
 }

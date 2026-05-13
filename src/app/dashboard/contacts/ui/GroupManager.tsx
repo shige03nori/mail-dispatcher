@@ -6,6 +6,19 @@ import { ConfirmDialog } from "@/app/dashboard/ui/ConfirmDialog";
 
 type Group = { id: string; name: string };
 
+// TODO: グループ管理コンポーネントを実装する
+//
+// 仕様:
+// - 折りたたみ式パネル（クリックで開閉）
+// - グループ一覧をバッジ（タグ）形式で表示し、各バッジに × 削除ボタンを付ける
+// - 削除前は ConfirmDialog で確認する
+// - 新しいグループ名を入力して「追加」ボタンで POST /api/groups を呼ぶ
+// - グループ削除は DELETE /api/groups/{id} を呼ぶ
+// - 変更後に onGroupsChange コールバックで親に通知する
+//
+// ヒント:
+// - useState で open（開閉）・groups（一覧）・confirmId（削除確認対象ID）を管理する
+
 export default function GroupManager({
   initialGroups,
   onGroupsChange,
@@ -19,133 +32,23 @@ export default function GroupManager({
   const [msg, setMsg] = useState("");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
-  function updateGroups(next: Group[]) {
-    setGroups(next);
-    onGroupsChange?.(next);
-  }
-
-  async function addGroup(e: React.FormEvent) {
-    e.preventDefault();
-    const name = newName.trim();
-    if (!name) return;
-    setMsg("作成中...");
-
-    const res = await fetch("/api/groups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data?.ok) {
-      updateGroups([...groups, data.group]);
-      setNewName("");
-      setMsg("");
-    } else {
-      setMsg(data?.error === "name_already_exists" ? "同名のグループが既に存在します" : `失敗: ${data?.error ?? res.status}`);
-    }
-  }
-
-  async function deleteGroup(id: string) {
-    setMsg("削除中...");
-    const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      updateGroups(groups.filter((g) => g.id !== id));
-      setMsg("");
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setMsg(`削除失敗: ${data?.error ?? res.status}`);
-    }
-    setConfirmId(null);
-  }
-
+  // TODO: グループ追加・削除の処理を実装する
   return (
-    <div style={{ marginBottom: 16, border: "1px solid #333", borderRadius: 10 }}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: "100%",
-          padding: "10px 14px",
-          background: "transparent",
-          border: "none",
-          color: "#fff",
-          textAlign: "left",
-          cursor: "pointer",
-          fontWeight: 700,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
-        <span>{open ? "▼" : "▶"}</span>
-        グループ管理
+    <div style={{ marginBottom: 16, border: "1px solid #ccc", borderRadius: 8 }}>
+      <button type="button" onClick={() => setOpen((v) => !v)} style={{ width: "100%", padding: 12, textAlign: "left", background: "transparent", border: "none", cursor: "pointer", fontWeight: 700 }}>
+        {open ? "▼" : "▶"} グループ管理
       </button>
-
       {open && (
-        <div style={{ padding: "0 14px 14px" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-            {groups.length === 0 && (
-              <span style={{ color: "#888", fontSize: 13 }}>グループなし</span>
-            )}
-            {groups.map((g) => (
-              <span
-                key={g.id}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "3px 10px",
-                  background: "#1d4ed8",
-                  color: "#fff",
-                  borderRadius: 999,
-                  fontSize: 13,
-                }}
-              >
-                {g.name}
-                <button
-                  type="button"
-                  onClick={() => setConfirmId(g.id)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "#fff",
-                    cursor: "pointer",
-                    padding: "0 2px",
-                    lineHeight: 1,
-                    fontSize: 14,
-                  }}
-                  title="削除"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+        <div style={{ padding: "0 12px 12px" }}>
+          <p>TODO: グループ一覧・追加フォームを実装してください</p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="新しいグループ名" style={formStyle.input} />
+            <button type="button" onClick={() => alert("TODO: グループ追加を実装してください")}>追加</button>
           </div>
-
-          <form onSubmit={addGroup} style={{ display: "flex", gap: 8 }}>
-            <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="新しいグループ名"
-              style={{ ...formStyle.input, flex: 1 }}
-            />
-            <button type="submit" className="btn-custom01 btn-custom01-primary">
-              追加
-            </button>
-          </form>
-
-          {msg && <div style={{ marginTop: 8, fontSize: 13, color: "#f87171" }}>{msg}</div>}
+          {msg && <div style={{ color: "red" }}>{msg}</div>}
         </div>
       )}
-
-      <ConfirmDialog
-        open={confirmId !== null}
-        title="グループを削除"
-        message={`「${groups.find((g) => g.id === confirmId)?.name ?? ""}」を削除しますか？\n連絡先のグループ設定からも外れます。`}
-        onConfirm={() => confirmId && deleteGroup(confirmId)}
-        onCancel={() => setConfirmId(null)}
-      />
+      <ConfirmDialog open={confirmId !== null} title="グループを削除" message={`「${groups.find((g) => g.id === confirmId)?.name ?? ""}」を削除しますか？`} onConfirm={() => alert("TODO: 削除を実装")} onCancel={() => setConfirmId(null)} />
     </div>
   );
 }

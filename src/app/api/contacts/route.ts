@@ -3,79 +3,32 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { contactSchema } from "@/lib/schemas/contact";
 
+// TODO: 連絡先一覧取得・新規作成 API を実装する
+//
+// GET /api/contacts
+// - 未ログインなら 401
+// - 組織スコープ（organizationId: session.organizationId）で全連絡先を取得
+// - groups フィールドは JSON 文字列なので JSON.parse() して配列に変換して返す
+// - searchParams.groupId があれば、そのグループに属する連絡先のみ返す
+//
+// POST /api/contacts
+// - 未ログインなら 401、VIEWER なら 403
+// - contactSchema.safeParse() でバリデーション → 失敗なら 400
+// - email が既存と重複していれば 409
+// - prisma.contact.create() で保存（groups は JSON.stringify(groupIds) で保存）
+//
+// ヒント:
+// - groups フィールドの読み書き: JSON.parse(c.groups) / JSON.stringify(groupIds)
+// - 重複チェック: prisma.contact.findFirst({ where: { organizationId, email } })
+
 function parseGroups(raw: string): string[] {
   try { return JSON.parse(raw) as string[]; } catch { return []; }
 }
 
-type Body = {
-  name?: string;
-  companyName?: string;
-  email?: string;
-  phone?: string;
-  note?: string;
-  groupIds?: string[];
-};
-
 export async function GET(req: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-
-  const { searchParams } = new URL(req.url);
-  const groupId = searchParams.get("groupId");
-
-  const contacts = await prisma.contact.findMany({
-    where: { organizationId: session.organizationId },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const result = contacts
-    .map((c) => ({ ...c, groups: parseGroups(c.groups) }))
-    .filter((c) => !groupId || c.groups.includes(groupId));
-
-  return NextResponse.json({ ok: true, contacts: result });
+  throw new Error("TODO: GET /api/contacts を実装してください");
 }
 
 export async function POST(req: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-  if (session.role === "VIEWER")
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-
-  const body = (await req.json().catch(() => null)) as Body | null;
-
-  const parsed = contactSchema.safeParse(body ?? {});
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    return NextResponse.json({ ok: false, error: firstIssue?.message ?? "validation_error" }, { status: 400 });
-  }
-
-  const name = parsed.data.name.trim();
-  const companyName = (parsed.data.companyName ?? "").trim() || null;
-  const email = (parsed.data.email ?? "").trim().toLowerCase() || null;
-  const phone = (parsed.data.phone ?? "").trim() || null;
-  const note = (parsed.data.note ?? "").trim() || null;
-  const groupIds = parsed.data.groupIds ?? [];
-
-  if (email) {
-    const dup = await prisma.contact.findFirst({
-      where: { organizationId: session.organizationId, email },
-    });
-    if (dup) return NextResponse.json({ ok: false, error: "email_already_exists" }, { status: 409 });
-  }
-
-  const created = await prisma.contact.create({
-    data: {
-      organizationId: session.organizationId,
-      name,
-      companyName,
-      email,
-      phone,
-      note,
-      groups: JSON.stringify(groupIds),
-      createdByUserId: session.userId,
-      updatedByUserId: session.userId,
-    },
-  });
-
-  return NextResponse.json({ ok: true, contact: { ...created, groups: parseGroups(created.groups) } });
+  throw new Error("TODO: POST /api/contacts を実装してください");
 }

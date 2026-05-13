@@ -1,61 +1,23 @@
 import type { CSSProperties } from "react";
 
-const controlBase: CSSProperties = {
-  height: 40,
-  padding: "0 12px",
-  lineHeight: "1.4",
-  boxSizing: "border-box",
-  border: "1px solid #ddd",
-  borderRadius: 10,
-  background: "#000",
-  color: "#fff",
-};
+// TODO: フォーム要素の inline style オブジェクトを定義する
+// ヒント: CSSProperties 型を使うと補完が効いて便利
+// ヒント: input / textarea / select は幅・高さ・パディング・ボーダーなどを揃えると統一感が出る
+// ヒント: satisfies CSSProperties を使うと型チェックをしながら export できる
+//
+// 例:
+// export const formStyle = {
+//   label: { display: "block", fontSize: 13 } satisfies CSSProperties,
+//   input: { width: "100%", height: 40, padding: "0 12px", border: "1px solid #ccc", borderRadius: 6 } satisfies CSSProperties,
+//   textarea: { width: "100%", minHeight: 120, padding: 10, border: "1px solid #ccc", borderRadius: 6 } satisfies CSSProperties,
+//   select: { height: 40, padding: "0 12px", border: "1px solid #ccc", borderRadius: 6 } satisfies CSSProperties,
+// };
 
 export const formStyle = {
-  label: {
-    display: "block",
-    fontSize: 13,
-    color: "#111",
-  } satisfies CSSProperties,
-
-  input: {
-    ...controlBase,
-    width: "100%",
-  } satisfies CSSProperties,
-
-  textarea: {
-    width: "100%",
-    minHeight: 120,
-    padding: 10,
-    color: "#fff",
-    border: "1px solid #ddd",
-    borderRadius: 10,
-    background: "#000",
-  } satisfies CSSProperties,
-
-  select: {
-    ...controlBase,
-    appearance: "none",       // OSデザイン差を減らす
-    backgroundImage:
-      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath d='M5.5 7.5L10 12l4.5-4.5'/%3E%3C/svg%3E\")",
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "right 10px center",
-    backgroundSize: "14px",
-    paddingRight: 32,
-  } satisfies CSSProperties,
-
-  button: {
-    height: 36,
-    padding: "0 14px",
-    border: "1px solid #ddd",
-    borderRadius: 10,
-    fontWeight: 800,
-    background: "#fafafa",
-    color: "#111",
-  } satisfies CSSProperties,
-
-  help: {
-    fontSize: 12,
-    color: "#555",
-  } satisfies CSSProperties,
+  label: {} satisfies CSSProperties,
+  input: {} satisfies CSSProperties,
+  textarea: {} satisfies CSSProperties,
+  select: {} satisfies CSSProperties,
+  button: {} satisfies CSSProperties,
+  help: {} satisfies CSSProperties,
 };

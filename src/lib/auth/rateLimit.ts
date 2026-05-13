@@ -13,26 +13,18 @@ const store = new Map<string, Entry>();
 const WINDOW_MS = 15 * 60 * 1000; // 15分
 const MAX_REQUESTS = 10;
 
+// TODO: キー（IPアドレス等）ごとに15分間で10回を超えたら true を返す関数を実装する
+// ヒント: store.get(key) でエントリを取得し、なければ { count: 1, resetAt: now + WINDOW_MS } で初期化
+// ヒント: entry.resetAt < now なら期限切れなのでリセット
+// ヒント: entry.count を+1して MAX_REQUESTS を超えたら true を返す
 /**
  * @returns true = 制限超過（429を返すべき）
  */
 export function isRateLimited(key: string): boolean {
-  const now = Date.now();
-  const entry = store.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-
-  entry.count += 1;
-  if (entry.count > MAX_REQUESTS) {
-    return true;
-  }
-  return false;
+  throw new Error("TODO: isRateLimited を実装してください");
 }
 
-/** テスト・シード用にリセット */
+/** テスト用にリセット */
 export function resetRateLimit(key: string) {
   store.delete(key);
 }

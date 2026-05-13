@@ -17,6 +17,24 @@ type Initial = {
   groupIds: string[];
 };
 
+// TODO: 連絡先フォームコンポーネントを実装する（新規作成・編集共通）
+//
+// 仕様:
+// - 入力項目: 氏名（必須）・会社名・メール・電話・メモ・グループ（複数選択）
+// - 送信前に contactSchema（Zod）でバリデーションを行い、エラーを各フィールド横に表示する
+// - mode === "create" のとき: POST /api/contacts へ送信し、成功後 /dashboard/contacts へ遷移
+// - mode === "update" のとき: PUT /api/contacts/{id} へ送信し、成功後「保存しました」と表示
+// - canEdit が false（VIEWER）のとき全フィールドを disabled にし、送信ボタンを非表示にする
+// - グループ: useEffect で GET /api/groups を呼んで一覧を取得
+// - インライングループ作成: POST /api/groups で新しいグループを作り、作成後に選択済みにする
+//   ※ フォーム内の「Enter」キーでグループを追加する場合、form の submit が走らないよう
+//     onKeyDown で e.preventDefault() を呼ぶこと
+//
+// ヒント:
+// - contactSchema.safeParse(payload) でバリデーション
+// - parsed.error.issues で全エラーを取り出し、フィールドごとに最初のメッセージを表示する
+// - グループ選択はチェックボックスより「クリックで選択/解除」するリスト形式が見やすい
+
 export default function ContactForm({
   mode,
   canEdit = true,
@@ -33,8 +51,6 @@ export default function ContactForm({
   const [note, setNote] = useState(initial?.note ?? "");
   const [groupIds, setGroupIds] = useState<string[]>(initial?.groupIds ?? []);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [groupMsg, setGroupMsg] = useState("");
   const [msg, setMsg] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -45,173 +61,28 @@ export default function ContactForm({
       .catch(() => {});
   }, []);
 
-  function toggleGroup(id: string) {
-    if (!canEdit) return;
-    setGroupIds((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
-    );
-  }
-
-  async function createGroup() {
-    const trimmed = newGroupName.trim();
-    if (!trimmed) return;
-    setGroupMsg("作成中...");
-
-    const res = await fetch("/api/groups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: trimmed }),
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data?.ok) {
-      setGroups((prev) => [...prev, data.group]);
-      setGroupIds((prev) => [...prev, data.group.id]);
-      setNewGroupName("");
-      setGroupMsg("");
-    } else {
-      setGroupMsg(
-        data?.error === "name_already_exists"
-          ? "同名のグループが既に存在します"
-          : `失敗: ${data?.error ?? res.status}`
-      );
-    }
-  }
-
-  async function submit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    setErrors({});
-
-    const payload = { name, companyName, email, phone, note, groupIds };
-    const parsed = contactSchema.safeParse(payload);
-    if (!parsed.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const key = String(issue.path[0] ?? "");
-        if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setMsg("保存中...");
-
-    const res =
-      mode === "create"
-        ? await fetch("/api/contacts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          })
-        : await fetch(`/api/contacts/${initial!.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data?.ok) {
-      setMsg("保存しました");
-      if (mode === "create") {
-        window.location.href = "/dashboard/contacts";
-      }
-    } else {
-      setMsg(`失敗: ${data?.error ?? res.status}`);
-    }
-  }
-
+  // TODO: フォームのsubmit処理・グループ作成・グループ選択トグルを実装する
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
-      <label style={{ fontWeight: 600 }}>氏名（必須）</label>
-      <input value={name} onChange={(e) => setName(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input, ...(errors.name ? { borderColor: "#f87171" } : {}) }} />
-      {errors.name && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{errors.name}</div>}
+    <form onSubmit={(e) => { e.preventDefault(); alert("TODO: ContactForm を実装してください"); }} style={{ display: "grid", gap: 10 }}>
+      <label>氏名（必須）</label>
+      <input value={name} onChange={(e) => setName(e.target.value)} disabled={!canEdit} style={formStyle.input} />
+      {errors.name && <div style={{ color: "red" }}>{errors.name}</div>}
 
-      <label style={{ fontWeight: 600 }}>会社名</label>
-      <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
+      <label>メール</label>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={formStyle.input} />
+      {errors.email && <div style={{ color: "red" }}>{errors.email}</div>}
 
-      <label style={{ fontWeight: 600 }}>メール</label>
-      <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input, ...(errors.email ? { borderColor: "#f87171" } : {}) }} />
-      {errors.email && <div style={{ fontSize: 12, color: "#f87171", marginTop: -6 }}>{errors.email}</div>}
+      <label>メモ</label>
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!canEdit} style={formStyle.textarea} />
 
-      <label style={{ fontWeight: 600 }}>電話</label>
-      <input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!canEdit} style={{ ...formStyle.input }} />
+      <p>グループ: {groupIds.length}件選択中</p>
 
-      <label style={{ fontWeight: 600 }}>メモ</label>
-      <textarea value={note} onChange={(e) => setNote(e.target.value)} disabled={!canEdit} style={{ ...formStyle.textarea }} />
-
-      <label style={{ fontWeight: 600 }}>グループ</label>
-
-      {/* グループ選択リスト */}
-      <div style={{ border: "1px solid #fff", borderRadius: 10, overflow: "hidden" }}>
-        {groups.length === 0 ? (
-          <div style={{ padding: "10px 14px", color: "#888", fontSize: 13 }}>
-            グループがありません。下のフォームから追加してください。
-          </div>
-        ) : (
-          groups.map((g, i) => {
-            const selected = groupIds.includes(g.id);
-            return (
-              <div
-                key={g.id}
-                onClick={() => toggleGroup(g.id)}
-                style={{
-                  padding: "10px 14px",
-                  cursor: canEdit ? "pointer" : "default",
-                  background: selected ? "#1d4ed8" : "transparent",
-                  color: selected ? "#fff" : "#ccc",
-                  borderBottom: i < groups.length - 1 ? "1px solid #222" : "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  userSelect: "none",
-                }}
-              >
-                <span style={{ fontSize: 12, width: 16, textAlign: "center" }}>
-                  {selected ? "✓" : ""}
-                </span>
-                {g.name}
-              </div>
-            );
-          })
-        )}
+      <div style={{ display: "flex", gap: 10 }}>
+        {canEdit && <button type="submit">{mode === "create" ? "作成" : "更新"}</button>}
+        <Link href="/dashboard/contacts">連絡先一覧へ戻る</Link>
       </div>
 
-      {/* インライングループ作成（編集可能時のみ） */}
-      {canEdit && (
-        <div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              value={newGroupName}
-              onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="新しいグループ名を追加"
-              style={{ ...formStyle.input, flex: 1 }}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); createGroup(); } }}
-            />
-            <button type="button" onClick={createGroup} className="btn-custom01 btn-custom01-success" style={{ marginTop: -2, marginBottom: 4}}>
-              追加
-            </button>
-          </div>
-          {groupMsg && (
-            <div style={{ marginTop: 4, fontSize: 13, color: "#f87171" }}>{groupMsg}</div>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 4 }}>
-        {canEdit ? (
-          <button type="submit" className="btn-custom01 btn-custom01-primary">
-            {mode === "create" ? "作成" : "更新"}
-          </button>
-        ) : (
-          <span style={{ color: "#888" }}>閲覧のみ（VIEWER）</span>
-        )}
-        <Link href="/dashboard/contacts" className="btn-custom01">
-          連絡先一覧へ戻る
-        </Link>
-      </div>
-
-      {msg && <div style={{ padding: 10, border: "1px solid #eee" }}>{msg}</div>}
+      {msg && <div>{msg}</div>}
     </form>
   );
 }

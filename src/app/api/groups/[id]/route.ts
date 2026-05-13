@@ -2,20 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 
+// TODO: グループ削除 API を実装する
+//
+// DELETE /api/groups/{id}
+// - 未ログインなら 401、VIEWER なら 403
+// - organizationId スコープで存在確認し、見つからなければ 404
+// - prisma.contactGroup.delete() で削除して { ok: true } を返す
+//
+// ヒント:
+// - ctx.params は Promise<{ id: string }> なので const { id } = await ctx.params;
+
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-  if (session.role === "VIEWER")
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-
-  const { id } = await ctx.params;
-
-  const group = await prisma.contactGroup.findFirst({
-    where: { id, organizationId: session.organizationId },
-  });
-  if (!group) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-
-  await prisma.contactGroup.delete({ where: { id } });
-
-  return NextResponse.json({ ok: true });
+  throw new Error("TODO: DELETE /api/groups/{id} を実装してください");
 }

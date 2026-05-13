@@ -1,29 +1,14 @@
 import nodemailer from "nodemailer";
 import { SendEmailArgs, SendEmailResult } from "./types";
 
+// TODO: nodemailer を使って SMTP 経由でメールを送信する関数を実装する
+// ヒント: nodemailer.createTransport({ host, port, auth: { user, pass } }) でトランスポーター作成
+//         環境変数 SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS / MAIL_FROM を使う
+// ヒント: transporter.sendMail({ from, to, subject, text, html, attachments }) で送信
+// ヒント: attachments は args.attachments を { filename, content } の配列にマッピングする
+// ヒント: sendMail の戻り値 info.messageId を { messageId } として返す
 export async function sendEmailSMTP(
   args: SendEmailArgs
 ): Promise<SendEmailResult> {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || "587"),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM,
-    to: args.to,
-    subject: args.subject,
-    text: args.text,
-    html: args.html,
-    attachments: args.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
-  });
-
-  return {
-    messageId: info.messageId,
-  };
+  throw new Error("TODO: sendEmailSMTP を実装してください");
 }

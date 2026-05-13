@@ -4,43 +4,21 @@ import { generateToken, sha256 } from "@/lib/auth/token";
 import { sendMagicLink } from "@/lib/mail";
 import { isRateLimited } from "@/lib/auth/rateLimit";
 
+// TODO: Magic Link 発行 API を実装する
+//
+// 仕様:
+// - POST /api/auth/request-link
+// - リクエスト: { email: string }
+// - IP アドレスでレートリミットを適用する（制限時もユーザー存在を漏らさないよう { ok: true } を返す）
+// - メールアドレスでユーザーを検索し、存在しない場合は何もせず { ok: true } を返す
+//   （列挙攻撃対策: ユーザーの存在有無を応答に含めない）
+// - generateToken() でトークンを生成し、sha256() でハッシュ化してDBに保存（有効期限15分）
+// - sendMagicLink(email, url) で Magic Link を送信する
+//
+// ヒント:
+// - prisma.loginToken.create({ data: { userId, tokenHash, expiresAt } }) で保存
+// - URL は `${process.env.APP_URL}/api/auth/verify?token=${encodeURIComponent(token)}`
+
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(`magic:${ip}`)) {
-    // 列挙対策のため成功レスポンスを返す（レートリミットであることを隠す）
-    return NextResponse.json({ ok: true });
-  }
-
-  const body = await req.json().catch(() => null);
-  const email = (body?.email ?? "").toString().trim().toLowerCase();
-
-  // 常に同じレスポンスで、ユーザー存在の推測を防ぐ（列挙対策）
-  const okResponse = NextResponse.json({ ok: true });
-
-  if (!email || !email.includes("@")) return okResponse;
-
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  // ユーザーがいなければ何もせずOK（招待制のため）
-  if (!user) return okResponse;
-
-  // ログイン用トークンを発行（15分）
-  const token = generateToken();
-  const tokenHash = sha256(token);
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-  await prisma.loginToken.create({
-    data: {
-      userId: user.id,
-      tokenHash,
-      expiresAt,
-    },
-  });
-
-  const appUrl = process.env.APP_URL || "http://localhost:3000";
-  const url = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}`;
-
-  await sendMagicLink(email, url);
-
-  return okResponse;
+  throw new Error("TODO: POST /api/auth/request-link を実装してください");
 }

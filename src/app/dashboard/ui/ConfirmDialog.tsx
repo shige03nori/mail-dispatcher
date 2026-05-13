@@ -9,6 +9,19 @@ interface Props {
   onCancel: () => void;
 }
 
+// TODO: 汎用確認ダイアログコンポーネントを実装する
+//
+// 仕様:
+// - open が false のとき null を返して非表示にする
+// - 画面全体を覆う半透明オーバーレイの上にダイアログを表示する
+// - ダイアログにはタイトル・メッセージ・「キャンセル」「確認」ボタンを配置する
+// - オーバーレイクリックで onCancel を呼ぶ
+// - 「確認」ボタンのラベルは confirmLabel で変更できる（デフォルト「削除」）
+//
+// ヒント:
+// - position: fixed で画面中央（top:50%, left:50%, transform:translate(-50%,-50%)）に配置する
+// - zIndex はオーバーレイよりダイアログを大きくする（例: overlay:100, dialog:101）
+
 export function ConfirmDialog({
   open,
   title,
@@ -19,49 +32,15 @@ export function ConfirmDialog({
 }: Props) {
   if (!open) return null;
 
+  // TODO: オーバーレイとダイアログを実装する
   return (
-    <>
-      {/* オーバーレイ */}
-      <div
-        onClick={onCancel}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.6)",
-          zIndex: 100,
-        }}
-      />
-
-      {/* ダイアログ */}
-      <div
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 101,
-          background: "#1e1e1e",
-          border: "1px solid #333",
-          borderRadius: 12,
-          padding: "24px 28px",
-          width: 360,
-          maxWidth: "calc(100vw - 32px)",
-          color: "#fff",
-        }}
-      >
-        <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{title}</h2>
-        <p style={{ fontSize: 14, color: "#ccc", marginBottom: 24, lineHeight: 1.6 }}>
-          {message}
-        </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onCancel} className="btn-custom01 btn-custom01-secondary">
-            キャンセル
-          </button>
-          <button onClick={onConfirm} className="btn-custom01 btn-custom01-danger">
-            {confirmLabel}
-          </button>
-        </div>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100 }}>
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "#fff", padding: 24, borderRadius: 8, zIndex: 101 }}>
+        <h2>{title}</h2>
+        <p>{message}</p>
+        <button onClick={onCancel}>キャンセル</button>
+        <button onClick={onConfirm}>{confirmLabel}</button>
       </div>
-    </>
+    </div>
   );
 }

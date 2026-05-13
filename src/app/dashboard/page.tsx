@@ -1,3 +1,18 @@
+// TODO: ダッシュボードトップページを実装する
+//
+// 仕様:
+// - getSession() でセッションを取得し、未ログインなら /login にリダイレクト
+// - ログイン中ユーザーの情報（メールアドレス・ロール）と組織名を表示する
+// - 各機能へのリンクボタンを並べる
+//   - 連絡先一覧・連絡先追加・テンプレ一覧・配信履歴（全ロール共通）
+//   - ユーザー招待（ADMIN / EDITOR のみ）・テンプレ作成（ADMIN / EDITOR のみ）
+//   - ユーザー管理（ADMIN のみ）
+//
+// ヒント:
+// - redirect("/login") は next/navigation からインポートする
+// - prisma.user.findUnique / prisma.organization.findUnique でデータ取得
+// - session.role === "VIEWER" のユーザーには作成・招待リンクを表示しない
+
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -5,114 +20,10 @@ import Link from "next/link";
 import { ChangePasswordForm } from "@/app/dashboard/ui/ChangePasswordForm";
 
 export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-
-  const user = await prisma.user.findUnique({ where: { id: session.userId } });
-  const org = await prisma.organization.findUnique({
-    where: { id: session.organizationId },
-  });
-
-  const canEdit = session.role !== "VIEWER";
-
+  // TODO: セッション確認・ユーザー情報取得・ページ表示を実装する
   return (
-    <main style={{ maxWidth: 800, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
-      {/* ヘッダー */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-      <h1 style={{ fontSize: 28, fontWeight: 800 }}>ダッシュボード</h1>
-
-        {/* ロゴ */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.97)",
-            borderRadius: 10,
-            padding: "6px 10px",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="VICENT" style={{ height: 26, display: "block" }} />
-        </div>
-      </div>
-
-      {/* 組織・ユーザー情報 */}
-      <section
-        style={{
-          marginTop: 16,
-          padding: 12,
-          border: "1px solid #ddd",
-          borderRadius: 10,
-        }}
-      >
-        <div>
-          <b>組織</b>: {org?.name ?? "(unknown)"}
-        </div>
-        <div>
-          <b>ユーザー</b>: {user?.email ?? "(unknown)"}
-        </div>
-        <div>
-          <b>ロール</b>: {session.role}
-        </div>
-        <ChangePasswordForm hasPassword={!!user?.passwordHash} />
-      </section>
-
-      {/* アクション */}
-      <section style={{ marginTop: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 12,
-            alignItems: "center",
-          }}
-        >
-          <Link href="/dashboard/contacts" className="btn-custom01">
-            連絡先
-          </Link>
-
-          <Link href="/dashboard/contacts/new" className="btn-custom01">
-            連絡先追加
-          </Link>
-
-          {session.role === "ADMIN" && (
-            <Link href="/dashboard/users" className="btn-custom01">
-              ユーザー管理
-            </Link>
-          )}
-
-          {canEdit && (
-            <Link href="/dashboard/invite" className="btn-custom01">
-              ユーザー招待
-            </Link>
-          )}
-
-          <Link href="/dashboard/templates" className="btn-custom01">
-            テンプレ一覧
-          </Link>
-
-          {canEdit && (
-            <Link href="/dashboard/templates/new" className="btn-custom01">
-              テンプレ作成
-            </Link>
-          )}
-
-          <Link href="/dashboard/campaigns" className="btn-custom01">
-            配信履歴
-          </Link>
-        </div>
-
-        {!canEdit && (
-          <div style={{ marginTop: 10, fontSize: 12, color: "#666" }}>
-            ※ VIEWER 権限では作成系（ユーザー招待・テンプレ作成）は表示されません
-          </div>
-        )}
-      </section>
+    <main style={{ padding: "72px 16px 16px 16px" }}>
+      <h1>TODO: ダッシュボードを実装してください</h1>
     </main>
   );
 }

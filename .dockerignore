@@ -1,9 +1,0 @@
-.git
-.gitignore
-.next
-node_modules
-prisma/*.db
-prisma/*.db-journal
-.env
-.env.local
-*.log

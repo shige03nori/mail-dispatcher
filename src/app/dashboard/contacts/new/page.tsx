@@ -1,18 +1,19 @@
+// TODO: 連絡先新規作成ページを実装する
+//
+// 仕様:
+// - getSession() でセッション確認し、未ログインなら /login、VIEWER なら /dashboard/contacts へリダイレクト
+// - ContactForm コンポーネントを mode="create" で表示する
+
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import ContactForm from "../ui/ContactForm";
 
 export default async function NewContactPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (session.role === "VIEWER") redirect("/dashboard/contacts");
-
+  // TODO: セッション確認と権限チェックを実装する
   return (
-    <main style={{ maxWidth: 800, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 800 }}>連絡先 新規作成</h1>
-      <div style={{ marginTop: 16 }}>
-        <ContactForm mode="create" />
-      </div>
+    <main style={{ padding: "72px 16px 16px 16px" }}>
+      <h1>TODO: 連絡先新規作成ページを実装してください</h1>
+      <ContactForm mode="create" />
     </main>
   );
 }

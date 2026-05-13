@@ -1,35 +1,11 @@
 import { SendEmailArgs, SendEmailResult } from "./types";
 
+// TODO: メール送信をシミュレートしてコンソールに内容を出力する関数を実装する
+// ヒント: console.log() で to / subject / text / html をそれぞれ出力する
+// ヒント: 戻り値は { messageId: `console-${Date.now()}` } のような一意な文字列を返す
+// ヒント: 添付ファイル(attachments)があればファイル名とサイズも出力すると親切
 export async function sendEmailConsole(
   args: SendEmailArgs
 ): Promise<SendEmailResult> {
-  console.log("=== EMAIL (console) ===");
-  console.log("to:", args.to);
-  console.log("subject:", args.subject);
-  console.log("text:", args.text);
-  if (args.html) console.log("html:", args.html);
-  if (args.attachments?.length) {
-    console.log("attachments:", args.attachments.map((a) => `${a.filename}(${a.content.length}bytes)`).join(", "));
-  }
-  console.log("=======================");
-
-  return {
-    messageId: `console-${Date.now()}`,
-  };
+  throw new Error("TODO: sendEmailConsole を実装してください");
 }
-
-// export async function sendEmailConsole(args: SendEmailArgs): Promise<SendEmailResult> {
-//   // ★テスト用: 件名に [FAIL] が入っていたら失敗させる
-//   if (args.subject.includes("[FAIL]")) {
-//     throw new Error("TEST_FAIL: forced failure by subject");
-//   }
-
-//   console.log("=== EMAIL (console) ===");
-//   console.log("to:", args.to);
-//   console.log("subject:", args.subject);
-//   console.log("text:", args.text);
-//   if (args.html) console.log("html:", args.html);
-//   console.log("=======================");
-
-//   return { messageId: `console-${Date.now()}` };
-// }

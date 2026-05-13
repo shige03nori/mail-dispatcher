@@ -3,72 +3,38 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { contactSchema } from "@/lib/schemas/contact";
 
+// TODO: 連絡先の取得・更新・削除 API を実装する
+//
+// GET /api/contacts/{id}
+// - 未ログインなら 401
+// - organizationId スコープで取得し、見つからなければ 404
+//
+// PUT /api/contacts/{id}
+// - 未ログインなら 401、VIEWER なら 403
+// - organizationId スコープで存在確認し、見つからなければ 404
+// - contactSchema でバリデーション → 失敗なら 400
+// - prisma.contact.update() で更新（groups は JSON.stringify()）
+//
+// DELETE /api/contacts/{id}
+// - 未ログインなら 401、VIEWER なら 403
+// - organizationId スコープで存在確認し、見つからなければ 404
+// - prisma.contact.delete() で削除
+//
+// ヒント:
+// - ctx.params は Promise<{ id: string }> なので const { id } = await ctx.params; で取得
+
 function parseGroups(raw: string): string[] {
   try { return JSON.parse(raw) as string[]; } catch { return []; }
 }
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-
-  const { id } = await ctx.params;
-
-  const contact = await prisma.contact.findFirst({
-    where: { id, organizationId: session.organizationId },
-  });
-  if (!contact) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-
-  return NextResponse.json({ ok: true, contact: { ...contact, groups: parseGroups(contact.groups) } });
+  throw new Error("TODO: GET /api/contacts/{id} を実装してください");
 }
 
 export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-  if (session.role === "VIEWER") return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-
-  const { id } = await ctx.params;
-
-  const existing = await prisma.contact.findFirst({
-    where: { id, organizationId: session.organizationId },
-  });
-  if (!existing) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-
-  const body = await req.json().catch(() => null);
-
-  const parsed = contactSchema.safeParse(body ?? {});
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    return NextResponse.json({ ok: false, error: firstIssue?.message ?? "validation_error" }, { status: 400 });
-  }
-
-  const name = parsed.data.name.trim();
-  const companyName = (parsed.data.companyName ?? "").trim() || null;
-  const email = (parsed.data.email ?? "").trim().toLowerCase() || null;
-  const phone = (parsed.data.phone ?? "").trim() || null;
-  const note = (parsed.data.note ?? "").trim() || null;
-  const groupIds = parsed.data.groupIds ?? [];
-
-  const updated = await prisma.contact.update({
-    where: { id },
-    data: { name, companyName, email, phone, note, groups: JSON.stringify(groupIds), updatedByUserId: session.userId },
-  });
-
-  return NextResponse.json({ ok: true, contact: { ...updated, groups: parseGroups(updated.groups) } });
+  throw new Error("TODO: PUT /api/contacts/{id} を実装してください");
 }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
-  if (session.role === "VIEWER") return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
-
-  const { id } = await ctx.params;
-
-  const existing = await prisma.contact.findFirst({
-    where: { id, organizationId: session.organizationId },
-  });
-  if (!existing) return NextResponse.json({ ok: false, error: "not_found" }, { status: 404 });
-
-  await prisma.contact.delete({ where: { id } });
-
-  return NextResponse.json({ ok: true });
+  throw new Error("TODO: DELETE /api/contacts/{id} を実装してください");
 }

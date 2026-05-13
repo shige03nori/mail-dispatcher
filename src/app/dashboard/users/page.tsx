@@ -1,3 +1,14 @@
+// TODO: ユーザー管理ページを実装する
+//
+// 仕様:
+// - getSession() でセッションを確認し、未ログインなら /login、ADMIN 以外なら /dashboard へリダイレクト
+// - 同じ組織のメンバー一覧を表形式で表示する（名前・メール・ロール・パスワード設定状態）
+// - 各行に SetPasswordForm（パスワード設定フォーム）を配置する
+//
+// ヒント:
+// - prisma.membership.findMany({ where: { organizationId }, include: { user: true } }) でメンバー取得
+// - user.passwordHash があれば「設定済み」、なければ「未設定」を表示する
+
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -6,61 +17,10 @@ import { tableStyle } from "@/lib/ui/tableStyle";
 import SetPasswordForm from "./SetPasswordForm";
 
 export default async function UsersPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (session.role !== "ADMIN") redirect("/dashboard");
-
-  const members = await prisma.membership.findMany({
-    where: { organizationId: session.organizationId },
-    include: { user: true },
-    orderBy: { createdAt: "asc" },
-  });
-
+  // TODO: セッション確認・メンバー一覧取得・ページ表示を実装する
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto 40px", padding: "72px 16px 16px 16px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800 }}>ユーザー管理</h1>
-        <Link href="/dashboard" className="btn-custom01">
-          ← ダッシュボードへ
-        </Link>
-      </div>
-
-      <p style={{ marginTop: 8, fontSize: 13, color: "#aaa" }}>
-        メンバー一覧。パスワードを設定するとパスワードログインが有効になります。
-      </p>
-
-      <div className="table-scroll-wrap" style={{ marginTop: 20, border: "1px solid #e5e7eb", borderRadius: 10 }}>
-        <table style={{ ...tableStyle.table, color: "#fff" }}>
-          <thead style={{ background: "#fff" }}>
-            <tr>
-              <th style={{ ...tableStyle.th, color: "#111" }}>名前</th>
-              <th style={{ ...tableStyle.th, color: "#111" }}>メールアドレス</th>
-              <th style={{ ...tableStyle.th, color: "#111" }}>ロール</th>
-              <th style={{ ...tableStyle.th, color: "#111" }}>パスワード</th>
-              <th style={{ ...tableStyle.th, color: "#111" }}>パスワード設定</th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map(({ user, role }) => (
-              <tr key={user.id}>
-                <td style={{ ...tableStyle.td, color: "#fff" }}>{user.name ?? "-"}</td>
-                <td style={{ ...tableStyle.td, color: "#fff" }}>{user.email}</td>
-                <td style={{ ...tableStyle.td, color: "#fff" }}>{role}</td>
-                <td style={{ ...tableStyle.td }}>
-                  {user.passwordHash ? (
-                    <span style={{ color: "#4ade80", fontWeight: 600 }}>設定済み</span>
-                  ) : (
-                    <span style={{ color: "#666" }}>未設定</span>
-                  )}
-                </td>
-                <td style={{ ...tableStyle.td }}>
-                  <SetPasswordForm userId={user.id} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <main style={{ padding: "72px 16px 16px 16px" }}>
+      <h1>TODO: ユーザー管理ページを実装してください</h1>
     </main>
   );
 }

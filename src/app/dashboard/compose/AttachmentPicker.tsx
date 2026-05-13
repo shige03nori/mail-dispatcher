@@ -2,64 +2,36 @@
 
 import { useRef, useState } from "react";
 
+// TODO: 添付ファイル選択コンポーネントを実装する
+//
+// 仕様:
+// - 「ファイルを選択」ボタンをクリックすると file input が開く（input は非表示）
+// - 選択したファイルの名前を一覧で表示する（例: 📎 ファイル名.pdf ✕）
+// - ✕ ボタンでファイルを一覧から除外できる
+// - input の name は "attachments"（複数選択可: multiple 属性）
+//
+// ヒント:
+// - useRef<HTMLInputElement>(null) で input 要素への参照を持つ
+// - 除外は DataTransfer を使って input.files を更新する:
+//   const dt = new DataTransfer();
+//   files.filter(exclude).forEach(f => dt.items.add(f));
+//   inputRef.current.files = dt.files;
+
 export function AttachmentPicker() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileNames, setFileNames] = useState<string[]>([]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    setFileNames(files.map((f) => f.name));
-  }
-
-  function removeFile(index: number) {
-    const dt = new DataTransfer();
-    const files = Array.from(inputRef.current?.files ?? []);
-    files.forEach((f, i) => { if (i !== index) dt.items.add(f); });
-    if (inputRef.current) inputRef.current.files = dt.files;
-    setFileNames((prev) => prev.filter((_, i) => i !== index));
-  }
-
+  // TODO: ファイル選択・除外の処理を実装する
   return (
-    <div style={{ padding: "12px 14px", border: "1px solid #fff", borderRadius: 10 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-        添付ファイル
-        <span style={{ fontWeight: 400, color: "#94a3b8", marginLeft: 8 }}>（複数選択可）</span>
-      </div>
-
-      <input
-        ref={inputRef}
-        type="file"
-        name="attachments"
-        multiple
-        style={{ display: "none" }}
-        onChange={handleChange}
-      />
-
-      <button
-        type="button"
-        className="btn-custom01"
-        onClick={() => inputRef.current?.click()}
-      >
-        <span className="btn-custom01-front">ファイルを選択</span>
-      </button>
-
-      {fileNames.length > 0 && (
-        <ul style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4, listStyle: "none", padding: 0 }}>
-          {fileNames.map((name, i) => (
-            <li key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-              <span style={{ color: "#94a3b8" }}>📎</span>
-              <span>{name}</span>
-              <button
-                type="button"
-                onClick={() => removeFile(i)}
-                style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 13, padding: "0 4px" }}
-              >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div style={{ padding: "12px 14px", border: "1px solid #ccc", borderRadius: 8 }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>添付ファイル（複数選択可）</div>
+      <input ref={inputRef} type="file" name="attachments" multiple style={{ display: "none" }} onChange={(e) => setFileNames(Array.from(e.target.files ?? []).map((f) => f.name))} />
+      <button type="button" onClick={() => inputRef.current?.click()}>ファイルを選択</button>
+      <ul>
+        {fileNames.map((name, i) => (
+          <li key={i}>📎 {name} <button type="button" onClick={() => setFileNames((prev) => prev.filter((_, j) => j !== i))}>✕</button></li>
+        ))}
+      </ul>
     </div>
   );
 }

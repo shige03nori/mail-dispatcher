@@ -1,5 +1,32 @@
 "use server";
 
+// TODO: テンプレートの Server Action を実装する
+//
+// 実装する関数:
+// 1. createTemplateAction(formData)
+//    - getSession() で認証・権限チェック（VIEWER は禁止）
+//    - formData から name / subject / textBody / htmlBody を取り出す
+//    - templateSchema（Zod）でバリデーション → エラーなら /new?err=... へリダイレクト
+//    - prisma.emailTemplate.create() で保存
+//    - 成功したら /dashboard/templates/{id}/edit?ok=1 へリダイレクト
+//
+// 2. updateTemplateAction(templateId, formData)
+//    - 同様の認証・バリデーション
+//    - prisma.emailTemplate.updateMany で organizationId スコープを使って更新
+//    - 成功したら /dashboard/templates/{id}/edit?ok=1 へリダイレクト
+//
+// 3. archiveTemplateAction(templateId)
+//    - isArchived: true に更新して /dashboard/templates?ok=archived へリダイレクト
+//
+// 4. restoreTemplateAction(templateId)
+//    - isArchived: false に更新して /dashboard/templates?ok=restored へリダイレクト
+//
+// ヒント:
+// - "use server" ディレクティブは必須（このファイルの先頭に記述）
+// - redirect() は例外として throw されるので、catch で isRedirectError(e) を確認してから再スローする
+//   import { isRedirectError } from "next/dist/client/components/redirect-error"
+// - revalidatePath("/dashboard/templates") でページキャッシュを更新する
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
@@ -8,145 +35,18 @@ import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { templateSchema } from "@/lib/schemas/template";
 
-function norm(s: unknown): string {
-  return String(s ?? "").trim();
-}
-
-function mustEditRole(role: string) {
-  return role === "ADMIN" || role === "EDITOR";
-}
-
 export async function createTemplateAction(formData: FormData) {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (!mustEditRole(session.role)) redirect("/dashboard/templates?err=forbidden");
-
-  const name = norm(formData.get("name"));
-  const subject = norm(formData.get("subject"));
-  const textBody = String(formData.get("textBody") ?? "");
-  const htmlBodyRaw = String(formData.get("htmlBody") ?? "");
-  const htmlBody = htmlBodyRaw.trim() ? htmlBodyRaw : null;
-
-  const parsed = templateSchema.safeParse({ name, subject, textBody, htmlBody: htmlBodyRaw });
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    const field = String(firstIssue?.path[0] ?? "body");
-    redirect(`/dashboard/templates/new?err=${encodeURIComponent(field)}`);
-  }
-
-  try {
-    const created = await prisma.emailTemplate.create({
-      data: {
-        organizationId: session.organizationId,
-        name,
-        subject,
-        textBody,
-        htmlBody,
-        createdByUserId: session.userId,
-        updatedByUserId: session.userId,
-      },
-      select: { id: true },
-    });
-
-    revalidatePath("/dashboard/templates");
-    redirect(`/dashboard/templates/${created.id}/edit?ok=1`);
-  } catch (e: unknown) {
-    // ✅ redirect() が投げる例外は握りつぶさない
-    if (isRedirectError(e)) throw e;
-
-    // ✅ Prisma の unique 制約違反だけ duplicate にする
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      redirect(`/dashboard/templates/new?err=duplicate`);
-    }
-
-    // それ以外は本当のエラーとして落とす（原因特定しやすい）
-    throw e;
-  }
+  throw new Error("TODO: createTemplateAction を実装してください");
 }
 
 export async function updateTemplateAction(templateId: string, formData: FormData) {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (!mustEditRole(session.role)) redirect("/dashboard/templates?err=forbidden");
-
-  const name = norm(formData.get("name"));
-  const subject = norm(formData.get("subject"));
-  const textBody = String(formData.get("textBody") ?? "");
-  const htmlBodyRaw = String(formData.get("htmlBody") ?? "");
-  const htmlBody = htmlBodyRaw.trim() ? htmlBodyRaw : null;
-
-  const parsed = templateSchema.safeParse({ name, subject, textBody, htmlBody: htmlBodyRaw });
-  if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
-    const field = String(firstIssue?.path[0] ?? "body");
-    redirect(`/dashboard/templates/${templateId}/edit?err=${encodeURIComponent(field)}`);
-  }
-
-  try {
-    await prisma.emailTemplate.updateMany({
-      where: { id: templateId, organizationId: session.organizationId },
-      data: {
-        name,
-        subject,
-        textBody,
-        htmlBody,
-        updatedByUserId: session.userId,
-      },
-    });
-
-    revalidatePath("/dashboard/templates");
-    redirect(`/dashboard/templates/${templateId}/edit?ok=1`);
-  } catch (e: unknown) {
-    if (isRedirectError(e)) throw e;
-
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      redirect(`/dashboard/templates/${templateId}/edit?err=duplicate`);
-    }
-
-    throw e;
-  }
+  throw new Error("TODO: updateTemplateAction を実装してください");
 }
 
 export async function archiveTemplateAction(templateId: string) {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (!mustEditRole(session.role)) redirect("/dashboard/templates?err=forbidden");
-
-  try {
-    await prisma.emailTemplate.updateMany({
-      where: { id: templateId, organizationId: session.organizationId },
-      data: {
-        isArchived: true,
-        updatedByUserId: session.userId,
-      },
-    });
-
-    revalidatePath("/dashboard/templates");
-    redirect("/dashboard/templates?ok=archived");
-  } catch (e: unknown) {
-    if (isRedirectError(e)) throw e;
-    throw e;
-  }
+  throw new Error("TODO: archiveTemplateAction を実装してください");
 }
 
 export async function restoreTemplateAction(templateId: string) {
-  const session = await getSession();
-  if (!session) redirect("/login");
-  if (!mustEditRole(session.role)) redirect("/dashboard/templates?err=forbidden");
-
-  try {
-    await prisma.emailTemplate.updateMany({
-      where: { id: templateId, organizationId: session.organizationId },
-      data: {
-        isArchived: false,
-        updatedByUserId: session.userId,
-      },
-    });
-
-    revalidatePath("/dashboard/templates");
-    redirect("/dashboard/templates?ok=restored");
-  } catch (e: unknown) {
-    if (isRedirectError(e)) throw e;
-    throw e;
-  }
+  throw new Error("TODO: restoreTemplateAction を実装してください");
 }
